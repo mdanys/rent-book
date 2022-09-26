@@ -33,10 +33,19 @@ func (um UsersModel) GetAll() ([]Users, error) {
 
 func (um UsersModel) Get(_email, _password string) ([]Users, error) {
 	var result []Users
-	err := um.DB.Where(&Users{Email: _email, Password: _password}).Find(&result).Error
+	err := um.DB.Where(&Users{Email: _email, Password: _password}).First(&result).Error
 	if err != nil {
 		fmt.Println("Error on Query Email and Password", err.Error())
 		return nil, err
 	}
 	return result, nil
+}
+
+func (um UsersModel) Create(newData Users) (Users, error) {
+	err := um.DB.Save(&newData).Error
+	if err != nil {
+		fmt.Println("Error on Create", err.Error())
+		return Users{}, err
+	}
+	return newData, nil
 }
