@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+
+	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -15,5 +18,21 @@ func connectGorm() (*gorm.DB, error) {
 }
 
 func main() {
+	var isRunning bool = true
+	var inputMenu int
 
+	for isRunning {
+		fmt.Println("\t--Main Menu--")
+		fmt.Println("1. Search Books")
+		fmt.Println("2. List of Books")
+		fmt.Println("3. Login/Register")
+		fmt.Println("9. Exit")
+		fmt.Print("Enter Your Input: ")
+		fmt.Scanln(&inputMenu)
+		switch inputMenu {
+		case 1:
+		case 2:
+		case 3:
+		}
+	}
 }
