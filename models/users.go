@@ -23,7 +23,6 @@ type UsersModel struct {
 func (um UsersModel) GetAll() ([]Users, error) {
 	var result []Users
 	err := um.DB.Find(&result).Error
-	// err := pm.DB.Table("products").Select("id", "nama", "stok", "harga").Model(&Product{}).Find(&result).Error
 	if err != nil {
 		fmt.Println("Error on Query", err.Error())
 		return nil, err
