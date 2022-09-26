@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	model "rent-book/models"
 
 	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
@@ -17,9 +20,26 @@ func connectGorm() (*gorm.DB, error) {
 	return db, nil
 }
 
+func callClear() {
+	cmd := exec.Command("clear")
+	cmd.Stdout = os.Stdout
+	cmd.Run()
+}
+
+func migrate(db *gorm.DB) {
+	db.AutoMigrate(&model.Users{})
+}
+
 func main() {
 	var isRunning bool = true
 	var inputMenu int
+	gconn, err := connectGorm()
+	migrate(gconn)
+	// userModel := models.UsersModel{gconn}
+	// userControl := controllers.UsersControl{userModel}
+	if err != nil {
+		fmt.Println("Can't connect to DB", err.Error())
+	}
 
 	for isRunning {
 		fmt.Println("\t--Main Menu--")
@@ -33,6 +53,11 @@ func main() {
 		case 1:
 		case 2:
 		case 3:
+
+		case 9:
+			callClear()
+			isRunning = false
+			fmt.Println("Thank you!")
 		}
 	}
 }
