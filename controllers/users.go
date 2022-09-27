@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	model "rent-book/models"
 )
 
@@ -30,7 +31,7 @@ func (uc UsersControl) Get(_username, _password string) ([]model.Users, error) {
 func (uc UsersControl) Create(newUser model.Users) (model.Users, error) {
 	result, err := uc.Model.Create(newUser)
 	if err != nil {
-		fmt.Println("Error on Create", err.Error())
+		log.Println("Error on Create", err.Error())
 		return model.Users{}, err
 	}
 	return result, nil
