@@ -96,13 +96,6 @@ func main() {
 				callClear()
 				isRunning = true
 			}
-<<<<<<< HEAD
-=======
-		case 9:
-			callClear()
-			isRunning = false
-			fmt.Println("Thank you!")
->>>>>>> f0ed24fbec7e9f920ae95231aa41fb38c7f7cee5
 		}
 	}
 }
