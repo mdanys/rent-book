@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"rent-book/controllers"
 	"rent-book/models"
+	model "rent-book/models"
 
 	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
@@ -27,15 +27,14 @@ func connectGorm() (*gorm.DB, error) {
 	return db, nil
 }
 
-func migrate(db *gorm.DB) {
-	db.AutoMigrate(&models.Users{})
-	log.Println("Init migrate")
-}
-
 func callClear() {
 	cmd := exec.Command("clear")
 	cmd.Stdout = os.Stdout
 	cmd.Run()
+}
+
+func migrate(db *gorm.DB) {
+	db.AutoMigrate(&model.Users{})
 }
 
 func main() {
@@ -62,8 +61,38 @@ func main() {
 			fmt.Scanln(&inputMenu)
 			switch inputMenu {
 			case 1:
+<<<<<<< Updated upstream
 			case 2:
 			case 3:
+=======
+				var Get model.Users
+				fmt.Println("Email:")
+				fmt.Scanln(&Get)
+				fmt.Println("Password:")
+				fmt.Scanln(&Get)
+			case 2:
+				var newUsers model.Users
+				fmt.Println("Input Name:")
+				fmt.Scanln(&newUsers.Name)
+				fmt.Println("Input Address:")
+				fmt.Scanln(&newUsers.Address)
+				fmt.Println("Input Phone:")
+				fmt.Scanln(&newUsers.Phone_number)
+				fmt.Println("Input Email:")
+				fmt.Scanln(&newUsers.Email)
+				fmt.Println("Input Password:")
+				fmt.Scanln(&newUsers.Password)
+
+				newUsers.Is_Active = true
+
+				result, err := userControl.Create(newUsers)
+				if err != nil {
+					fmt.Println("Error on Adding User", err.Error())
+				}
+				// fmt.Println("Input :", newUsers)
+				fmt.Println("\nRegistration User Success.", result)
+			case 9:
+>>>>>>> Stashed changes
 				callClear()
 				fmt.Println("\t--Login/Register--")
 				fmt.Println("1. Login")
@@ -164,9 +193,14 @@ func main() {
 					}
 				}
 			}
+		case 9:
+			callClear()
+			isRunning = false
+			fmt.Println("Thank you!")
 		}
 	}
 }
+<<<<<<< Updated upstream
 
 func MenuLoginRegister() {
 
@@ -180,3 +214,5 @@ func Message(_title, _content, _detail string) {
 	fmt.Println("Tekan Enter untuk melanjutkan.")
 	fmt.Scanln(&next)
 }
+=======
+>>>>>>> Stashed changes
