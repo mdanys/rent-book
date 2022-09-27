@@ -61,8 +61,33 @@ func main() {
 			fmt.Scanln(&inputMenu)
 			switch inputMenu {
 			case 1:
+				var Get model.Users
+				fmt.Println("Email:")
+				fmt.Scanln(&Get)
+				fmt.Println("Password:")
+				fmt.Scanln(&Get)
 			case 2:
-			case 3:
+				var newUsers model.Users
+				fmt.Println("Input Name:")
+				fmt.Scanln(&newUsers.Name)
+				fmt.Println("Input Address:")
+				fmt.Scanln(&newUsers.Address)
+				fmt.Println("Input Phone:")
+				fmt.Scanln(&newUsers.Phone_number)
+				fmt.Println("Input Email:")
+				fmt.Scanln(&newUsers.Email)
+				fmt.Println("Input Password:")
+				fmt.Scanln(&newUsers.Password)
+
+				newUsers.Is_Active = true
+
+				result, err := userControl.Create(newUsers)
+				if err != nil {
+					fmt.Println("Error on Adding User", err.Error())
+				}
+				// fmt.Println("Input :", newUsers)
+				fmt.Println("\nRegistration User Success.", result)
+			case 9:
 				callClear()
 				fmt.Println("\t--Login/Register--")
 				fmt.Println("1. Login")
@@ -121,10 +146,6 @@ func main() {
 					fmt.Println("Program keluar..")
 					isRunning = false
 				}
-			case 9:
-				fmt.Println("Terima Kasih")
-				fmt.Println("Program keluar..")
-				isRunning = false
 			}
 		} else {
 			fmt.Println("\t--HOMEPAGE MEMBER--")
