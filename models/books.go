@@ -12,7 +12,7 @@ type Books struct {
 	Author      string
 	Is_Borrowed bool
 	Is_Deleted  bool
-	Id_User     uint
+	IDUser      uint
 	//Id_Category uint
 }
 
@@ -33,6 +33,26 @@ func (bm BooksModel) GetAll() ([]Books, error) {
 func (bm BooksModel) GetWhere(_title string) ([]Books, error) {
 	var result []Books
 	err := bm.DB.Where(&Books{Title: _title}).Find(&result).Error
+	if err != nil {
+		fmt.Println("Error on Query", err.Error())
+		return nil, err
+	}
+	return result, nil
+}
+
+func (bm BooksModel) GetUserBooks(_IDUser uint) ([]Books, error) {
+	var result []Books
+	err := bm.DB.Where(&Books{IDUser: _IDUser}).Find(&result).Error
+	if err != nil {
+		fmt.Println("Error on Query", err.Error())
+		return nil, err
+	}
+	return result, nil
+}
+
+func (bm BooksModel) GetBorrowed() ([]Books, error) {
+	var result []Books
+	err := bm.DB.Where(&Books{}).Find(&result).Error
 	if err != nil {
 		fmt.Println("Error on Query", err.Error())
 		return nil, err
