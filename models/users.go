@@ -40,11 +40,11 @@ func (um UsersModel) Get(_email, _password string) ([]Users, error) {
 	return result, nil
 }
 
-func (um UsersModel) Create(newData Users) (Users, error) {
-	err := um.DB.Save(&newData).Error
+func (um UsersModel) Create(newUser Users) (Users, error) {
+	err := um.DB.Save(&newUser).Error
 	if err != nil {
 		fmt.Println("Error on Create", err.Error())
 		return Users{}, err
 	}
-	return newData, nil
+	return newUser, nil
 }

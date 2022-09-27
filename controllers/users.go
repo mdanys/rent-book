@@ -18,8 +18,8 @@ func (uc UsersControl) GetAll() ([]model.Users, error) {
 	return result, nil
 }
 
-func (uc UsersControl) Get() ([]model.Users, error) {
-	result, err := uc.Model.Get()
+func (uc UsersControl) Get(_username, _password string) ([]model.Users, error) {
+	result, err := uc.Model.Get(_username, _password)
 	if err != nil {
 		fmt.Println("Error on Get", err.Error())
 		return nil, err
@@ -27,8 +27,8 @@ func (uc UsersControl) Get() ([]model.Users, error) {
 	return result, nil
 }
 
-func (uc UsersControl) Create() (model.Users, error) {
-	result, err := uc.Model.Create()
+func (uc UsersControl) Create(newUser model.Users) (model.Users, error) {
+	result, err := uc.Model.Create(newUser)
 	if err != nil {
 		fmt.Println("Error on Create", err.Error())
 		return model.Users{}, err
