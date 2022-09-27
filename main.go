@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
-	model "rent-book/models"
+	"rent-book/controllers"
+	"rent-book/models"
 
 	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
@@ -20,14 +22,15 @@ func connectGorm() (*gorm.DB, error) {
 	return db, nil
 }
 
+func migrate(db *gorm.DB) {
+	db.AutoMigrate(&models.Users{})
+	log.Println("Init migrate")
+}
+
 func callClear() {
 	cmd := exec.Command("clear")
 	cmd.Stdout = os.Stdout
 	cmd.Run()
-}
-
-func migrate(db *gorm.DB) {
-	db.AutoMigrate(&model.Users{})
 }
 
 func main() {
@@ -35,8 +38,8 @@ func main() {
 	var inputMenu int
 	gconn, err := connectGorm()
 	migrate(gconn)
-	// userModel := models.UsersModel{gconn}
-	// userControl := controllers.UsersControl{userModel}
+	userModel := models.UsersModel{gconn}
+	userControl := controllers.UsersControl{userModel}
 	if err != nil {
 		fmt.Println("Can't connect to DB", err.Error())
 	}
@@ -53,11 +56,50 @@ func main() {
 		case 1:
 		case 2:
 		case 3:
-
-		case 9:
 			callClear()
-			isRunning = false
-			fmt.Println("Thank you!")
+			fmt.Println("\t--Login/Register--")
+			fmt.Println("1. Login")
+			fmt.Println("2. Register")
+			fmt.Println("9. Back")
+			fmt.Println("0. Main Menu")
+			fmt.Print("Enter Your Input: ")
+			fmt.Scanln(&inputMenu)
+			switch inputMenu {
+			case 1:
+				var Get models.Users
+				fmt.Println("Email:")
+				fmt.Scanln(&Get)
+				fmt.Println("Password:")
+				fmt.Scanln(&Get)
+			case 2:
+				var newUsers models.Users
+				fmt.Println("Input Name:")
+				fmt.Scanln(&newUsers.Name)
+				fmt.Println("Input Address:")
+				fmt.Scanln(&newUsers.Address)
+				fmt.Println("Input Phone:")
+				fmt.Scanln(&newUsers.Phone_number)
+				fmt.Println("Input Email:")
+				fmt.Scanln(&newUsers.Email)
+				fmt.Println("Input Password:")
+				fmt.Scanln(&newUsers.Password)
+
+				newUsers.Is_Active = true
+
+				result, err := userControl.Create(newUsers)
+				if err != nil {
+					fmt.Println("Error on Adding User", err.Error())
+				}
+				// fmt.Println("Input :", newUsers)
+				fmt.Println("\nRegistration User Success.", result)
+			case 9:
+				callClear()
+				isRunning = true
+			}
 		}
 	}
+}
+
+func MenuLoginRegister() {
+
 }
