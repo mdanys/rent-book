@@ -10,10 +10,10 @@ type Books struct {
 	gorm.Model
 	Title       string
 	Author      string
-	is_Borrowed bool
-	is_Deleted  bool
+	Is_Borrowed bool
+	Is_Deleted  bool
 	Id_User     uint
-	Id_Category uint
+	//Id_Category uint
 }
 
 type BooksModel struct {
@@ -23,6 +23,16 @@ type BooksModel struct {
 func (bm BooksModel) GetAll() ([]Books, error) {
 	var result []Books
 	err := bm.DB.Find(&result).Error
+	if err != nil {
+		fmt.Println("Error on Query", err.Error())
+		return nil, err
+	}
+	return result, nil
+}
+
+func (bm BooksModel) GetWhere(_title string) ([]Books, error) {
+	var result []Books
+	err := bm.DB.Where(&Books{Title: _title}).Find(&result).Error
 	if err != nil {
 		fmt.Println("Error on Query", err.Error())
 		return nil, err
@@ -46,4 +56,13 @@ func (bm BooksModel) Edit(updatedBooks Books) (Books, error) {
 		return Books{}, err
 	}
 	return updatedBooks, nil
+}
+
+func (bm BooksModel) Delete(deletedBooks Books) (Books, error) {
+	err := bm.DB.Delete(&deletedBooks).Error
+	if err != nil {
+		fmt.Println("Error on Delete", err.Error())
+		return Books{}, err
+	}
+	return deletedBooks, nil
 }

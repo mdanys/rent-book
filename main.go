@@ -16,6 +16,7 @@ import (
 var isRunning bool = true
 var isLoggedIn bool = false
 var currentUser models.Users
+var currentBook models.Books
 var yesNo string
 
 func connectGorm() (*gorm.DB, error) {
@@ -35,6 +36,7 @@ func callClear() {
 
 func migrate(db *gorm.DB) {
 	db.AutoMigrate(&model.Users{})
+	db.AutoMigrate(&model.Books{})
 }
 
 func main() {
@@ -44,6 +46,9 @@ func main() {
 	migrate(gconn)
 	userModel := models.UsersModel{DB: gconn}
 	userControl := controllers.UsersControl{Model: userModel}
+	bookModel := models.BooksModel{DB: gconn}
+	bookControl := controllers.BooksControl{Model: bookModel}
+
 	if err != nil {
 		fmt.Println("Can't connect to DB", err.Error())
 	}
@@ -61,6 +66,46 @@ func main() {
 			fmt.Scanln(&inputMenu)
 			switch inputMenu {
 			case 1:
+				callClear()
+				fmt.Println("\t--Find Books--")
+				fmt.Println("1. Find Books by Title")
+				fmt.Println("2. Find Books by Author")
+				fmt.Println("9. Back")
+				fmt.Println("0. Main Menu")
+				fmt.Print("Enter Your Input: ")
+				fmt.Scanln(&inputMenu)
+				switch inputMenu {
+				case 1:
+					callClear()
+					fmt.Println("\t--Find Books by Title--")
+					fmt.Println("Please enter book's title :")
+					fmt.Scanln(&currentBook.Title)
+
+					result, err := bookControl.GetWhere(currentBook.Title)
+					if err != nil {
+						//Message("Pencarian Buku Gagal", "Buku tidak di temukan", err.Error())
+					}
+
+					fmt.Println("Tabel Pencarian Buku")
+					fmt.Println("==================================")
+					fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status")
+
+					if result != nil {
+						//i := 1
+						// for _, value := range result {
+						// 	//fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", i, value.ID, value.Title, value.Author, value."Status")
+						// 	i++
+						// }
+					} else {
+						fmt.Println("\n\t\\tt Book Title not Found")
+					}
+
+					fmt.Println("9. Back")
+					fmt.Println("0. Main Menu")
+					fmt.Print("Enter Your Input: ")
+					fmt.Scanln(&inputMenu)
+				case 2:
+				}
 			case 2:
 			case 3:
 				callClear()
@@ -143,11 +188,185 @@ func main() {
 			case 2:
 			case 3:
 			case 4:
+				callClear()
+				fmt.Println("\t--My Library--")
+				fmt.Println("1. My Books")
+				fmt.Println("2. Borrow")
+
+				fmt.Println("===================")
+				fmt.Println("9. Back")
+				fmt.Println("0. Main Menu")
+				fmt.Print("Enter Your Input: ")
+				fmt.Scanln(&inputMenu)
+
+				switch inputMenu {
+				case 1:
+					callClear()
+					fmt.Println("\t--My Books--")
+					fmt.Println("1. Add Book")
+					fmt.Println("2. List My Book")
+
+					fmt.Println("===================")
+					fmt.Println("9. Back")
+					fmt.Println("0. Main Menu")
+					fmt.Print("Enter Your Input: ")
+					fmt.Scanln(&inputMenu)
+					switch inputMenu {
+					case 1:
+						var newBook models.Books
+						callClear()
+						fmt.Println("\t--Add Book--")
+						fmt.Println("Input Title:")
+						fmt.Scanln(&newBook.Title)
+						fmt.Println("Input Author:")
+						fmt.Scanln(&newBook.Author)
+
+						newBook.Is_Borrowed = false
+						newBook.Is_Deleted = false
+						newBook.Id_User = currentUser.ID
+
+						result, err := bookControl.Add(newBook)
+						if err != nil {
+							fmt.Println("Error on Adding Book", err.Error())
+						}
+						// fmt.Println("Input :", newUsers)
+						fmt.Println("\nAdding Book Success", result)
+					case 2:
+						listMyBookMenu := true
+						for listMyBookMenu {
+
+							callClear()
+							var inputBookNumber int
+
+							fmt.Println("\t--List My Book--")
+
+							result, err := bookControl.GetAll()
+							if err != nil {
+								//Message("Pencarian Buku Gagal", "Buku tidak di temukan", err.Error())
+							}
+
+							fmt.Println("List My Book Table")
+							fmt.Println("==================================")
+							fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status")
+
+							if result != nil {
+								i := 1
+								var status string
+								for _, value := range result {
+									if value.Is_Borrowed {
+										status = "Not Available"
+									} else {
+										status = "Available"
+									}
+									fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", i, value.ID, value.Title, value.Author, status)
+									i++
+								}
+							} else {
+								fmt.Println("\n\t\\tt Book Title not Found")
+							}
+
+							fmt.Println("\n==============================")
+							fmt.Println("1. Choose Number Edit Book Data")
+							fmt.Println("9. Back")
+							fmt.Println("0. Main Menu")
+							fmt.Print("Enter Your Input: ")
+							fmt.Scanln(&inputMenu)
+							switch inputMenu {
+							case 1:
+								fmt.Println("== Choose Number Edit Book Data ==")
+								fmt.Scanln(&inputBookNumber)
+
+								var targetedBook model.Books = result[inputBookNumber-1]
+
+								callClear()
+								fmt.Println("List My Book Table")
+								fmt.Println("==================================")
+								fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status")
+
+								var status string
+								if targetedBook.Is_Borrowed {
+									status = "Not Available"
+								} else {
+									status = "Available"
+								}
+								fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", 1, targetedBook.ID, targetedBook.Title, targetedBook.Author, status)
+
+								fmt.Println("\n==============================")
+								fmt.Println("1. Edit Title")
+								fmt.Println("2. Edit Author")
+								fmt.Println("3. Delete Book")
+								fmt.Println("9. Back")
+								fmt.Println("0. Main Menu")
+								fmt.Print("Enter Your Input: ")
+								fmt.Scanln(&inputMenu)
+								switch inputMenu {
+								case 1:
+									fmt.Println("\t--Edit Title--")
+									fmt.Println("Input Title :")
+									fmt.Scanln(&targetedBook.Title)
+									resUpdateBook, err := bookControl.Edit(targetedBook)
+									if err != nil {
+										fmt.Println("Error on Updating Book", err.Error())
+									}
+									Message("Success", "Adding Book Success", resUpdateBook)
+
+									// kembali ke menu list my book
+									listMyBookMenu = false
+								case 2:
+									fmt.Println("\t--Edit Author--")
+									fmt.Println("Input Author :")
+									fmt.Scanln(&targetedBook.Author)
+									resUpdateBook, err := bookControl.Edit(targetedBook)
+									if err != nil {
+										fmt.Println("Error on Updating Book", err.Error())
+									}
+									Message("Success", "Adding Book Success", resUpdateBook)
+
+									// kembali ke menu list my book
+									listMyBookMenu = false
+								case 3:
+									fmt.Println("\t--Delete Book--")
+
+									isNotYesNo := true
+									for isNotYesNo {
+										fmt.Println("Are you sure to delete this? (y/n)")
+										fmt.Scanln(&yesNo)
+										if yesNo == "Y" || yesNo == "y" {
+											resultDelete, err := bookControl.Delete(targetedBook)
+											if err != nil {
+												Message("Failed", "Deleting Book Failed", resultDelete)
+												fmt.Println("", err.Error())
+											}
+											Message("Success", "Deleting Book Success", resultDelete)
+
+											isNotYesNo = false
+											listMyBookMenu = false
+											callClear()
+										} else if yesNo == "N" || yesNo == "n" {
+											isNotYesNo = false
+											listMyBookMenu = false
+											callClear()
+										} else {
+											isNotYesNo = true
+										}
+									}
+								case 9:
+								case 0:
+								}
+
+							case 9:
+							case 0:
+
+							}
+						}
+					}
+				case 2:
+				}
 			case 9:
 				var isNotYesNo bool = true
 
 				for isNotYesNo {
-					fmt.Println("Apaah Anda yakin untuk Logout? (Y/N)")
+					fmt.Println("Are you sure to Logout? (Y/N)")
 					fmt.Scanln(&yesNo)
 					if yesNo == "Y" || yesNo == "y" {
 						isNotYesNo = false
@@ -157,9 +376,7 @@ func main() {
 						isNotYesNo = false
 						callClear()
 					} else {
-						for isNotYesNo {
-
-						}
+						isNotYesNo = true
 					}
 				}
 			}
@@ -171,7 +388,7 @@ func MenuLoginRegister() {
 
 }
 
-func Message(_title, _content, _detail string) {
+func Message(_title, _content, _detail interface{}) {
 	var next string
 	fmt.Println("=== ", _title, " ===")
 	fmt.Println(_content)
