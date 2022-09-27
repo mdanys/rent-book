@@ -12,7 +12,7 @@ type Users struct {
 	Password     string
 	Name         string
 	Address      string
-	Phone_number int
+	Phone_number string
 	Is_Active    bool
 }
 

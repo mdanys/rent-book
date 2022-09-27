@@ -38,8 +38,8 @@ func main() {
 	var inputMenu int
 	gconn, err := connectGorm()
 	migrate(gconn)
-	userModel := models.UsersModel{gconn}
-	userControl := controllers.UsersControl{userModel}
+	userModel := models.UsersModel{DB: gconn}
+	userControl := controllers.UsersControl{Model: userModel}
 	if err != nil {
 		fmt.Println("Can't connect to DB", err.Error())
 	}
