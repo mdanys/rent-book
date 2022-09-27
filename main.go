@@ -61,10 +61,6 @@ func main() {
 			fmt.Scanln(&inputMenu)
 			switch inputMenu {
 			case 1:
-<<<<<<< Updated upstream
-			case 2:
-			case 3:
-=======
 				var Get model.Users
 				fmt.Println("Email:")
 				fmt.Scanln(&Get)
@@ -92,7 +88,6 @@ func main() {
 				// fmt.Println("Input :", newUsers)
 				fmt.Println("\nRegistration User Success.", result)
 			case 9:
->>>>>>> Stashed changes
 				callClear()
 				fmt.Println("\t--Login/Register--")
 				fmt.Println("1. Login")
@@ -151,10 +146,6 @@ func main() {
 					fmt.Println("Program keluar..")
 					isRunning = false
 				}
-			case 9:
-				fmt.Println("Terima Kasih")
-				fmt.Println("Program keluar..")
-				isRunning = false
 			}
 		} else {
 			fmt.Println("\t--HOMEPAGE MEMBER--")
@@ -193,14 +184,9 @@ func main() {
 					}
 				}
 			}
-		case 9:
-			callClear()
-			isRunning = false
-			fmt.Println("Thank you!")
 		}
 	}
 }
-<<<<<<< Updated upstream
 
 func MenuLoginRegister() {
 
@@ -214,5 +200,3 @@ func Message(_title, _content, _detail string) {
 	fmt.Println("Tekan Enter untuk melanjutkan.")
 	fmt.Scanln(&next)
 }
-=======
->>>>>>> Stashed changes
