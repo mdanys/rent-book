@@ -19,6 +19,15 @@ func (bc BooksControl) GetAll() ([]model.Books, error) {
 	return result, nil
 }
 
+func (bc BooksControl) GetWhere(_title string) ([]model.Books, error) {
+	result, err := bc.Model.GetWhere(_title)
+	if err != nil {
+		fmt.Println("Error on GetWhere", err.Error())
+		return nil, err
+	}
+	return result, nil
+}
+
 func (bc BooksControl) Add(newBooks model.Books) (model.Books, error) {
 	result, err := bc.Model.Add(newBooks)
 	if err != nil {
@@ -32,6 +41,15 @@ func (bc BooksControl) Edit(updatedBooks model.Books) (model.Books, error) {
 	result, err := bc.Model.Edit(updatedBooks)
 	if err != nil {
 		log.Println("Error on Edit", err.Error())
+		return model.Books{}, err
+	}
+	return result, nil
+}
+
+func (bc BooksControl) Delete(deletedBooks model.Books) (model.Books, error) {
+	result, err := bc.Model.Delete(deletedBooks)
+	if err != nil {
+		log.Println("Error on Delete", err.Error())
 		return model.Books{}, err
 	}
 	return result, nil
