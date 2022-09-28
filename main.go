@@ -49,6 +49,8 @@ func main() {
 	userControl := controllers.UsersControl{Model: userModel}
 	bookModel := models.BooksModel{DB: gconn}
 	bookControl := controllers.BooksControl{Model: bookModel}
+	// lendModel := models.LendsModel{DB: gconn}
+	// lendControl := controllers.LendsControl{Model: lendModel}
 
 	if err != nil {
 		fmt.Println("Can't connect to DB", err.Error())
