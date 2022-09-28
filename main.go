@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"rent-book/controllers"
@@ -13,6 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
+var showError bool = true
 var isRunning bool = true
 var isLoggedIn bool = false
 var currentUser models.Users
@@ -622,6 +624,21 @@ func Message(_title, _content, _detail interface{}) {
 	fmt.Println("=== ", _title, " ===")
 	fmt.Println(_content)
 	fmt.Println(_detail)
+	fmt.Println("Tekan Enter untuk melanjutkan.")
+	fmt.Scanln(&next)
+}
+
+func ErrorMsg(_isShow bool, _title, _content, _detail interface{}) {
+	var next string
+	if _isShow {
+		fmt.Println("=== SHOW ERROR LOG ===")
+		fmt.Println("=== ", _title, " ===")
+		fmt.Println(_content)
+		log.Println(_detail)
+	} else {
+		fmt.Println("=== ", _title, " ===")
+		fmt.Println(_content)
+	}
 	fmt.Println("Tekan Enter untuk melanjutkan.")
 	fmt.Scanln(&next)
 }
