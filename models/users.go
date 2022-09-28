@@ -16,6 +16,7 @@ type Users struct {
 	Phone_number string
 	Is_Active    bool
 	Bookss       []Books `gorm:"foreignKey:IDUser;"`
+	Lendss       []Lends `gorm:"foreignKey:IDUser;"`
 }
 
 type UsersModel struct {

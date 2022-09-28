@@ -13,6 +13,8 @@ type Books struct {
 	Is_Borrowed bool
 	Is_Deleted  bool
 	IDUser      uint
+	Lendss      []Lends `gorm:"foreignKey:IDBook;"`
+	//Userss      []Users `gorm:"many2many:books_users;"`
 	//Id_Category uint
 }
 
