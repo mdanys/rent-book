@@ -189,6 +189,38 @@ func main() {
 			case 1:
 			case 2:
 			case 3:
+				Update_Profile := true
+				for Update_Profile {
+					callClear()
+					var inputEditNumber int
+
+					fmt.Println("\t--Update Profile--")
+
+					fmt.Println("Profile", currentUser.Name)
+					fmt.Println("=========================")
+					fmt.Printf("Name: %s\nAddress: %s\nNumber Phone: %s\nEmail: %s", currentUser.Name, currentUser.Address, currentUser.Phone_number, currentUser.Email)
+					fmt.Println("\n=========================")
+
+					fmt.Println("1. Edit Name")
+					fmt.Println("2. Edit Address")
+					fmt.Println("3. Edit Phone Number")
+					fmt.Println("4. Change Password")
+					fmt.Println("5. Deactivate Account")
+					fmt.Println("========================")
+					fmt.Println("9. Back")
+					fmt.Println("0. Main Menu")
+					fmt.Print("Enter Your Input: ")
+					fmt.Scanln(&inputMenu)
+					switch inputMenu {
+					case 1:
+					case 2:
+					case 3:
+					case 4:
+					case 5:
+					case 9:
+					case 0:
+					}
+				}
 			case 4:
 				callClear()
 				fmt.Println("\t--My Library--")
