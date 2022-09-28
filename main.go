@@ -43,7 +43,6 @@ func migrate(db *gorm.DB) {
 
 func main() {
 	var inputMenu int
-	var next string
 	gconn, err := connectGorm()
 	migrate(gconn)
 	userModel := models.UsersModel{DB: gconn}
@@ -136,12 +135,16 @@ func main() {
 							ErrorMsg(showError, "Login Failed", "Wrong Email or Password. Please try again.", err.Error())
 						}
 						if result != nil {
-							isLoggedIn = true
 							currentUser = result[0]
-							msg := "Login Sukses, Selamat Datang " + currentUser.Name
-							Message("Login Success", msg, "Move to Homepage Member")
-							fmt.Scanln(&next)
-							isLoginRegisterMenu = false
+							if currentUser.Is_Active == true {
+								isLoggedIn = true
+								msg := "Login Sukses, Selamat Datang " + currentUser.Name
+								Message("Login Success", msg, "Move to Homepage Member")
+								isLoginRegisterMenu = false
+							} else {
+								msg := "Login Failed, Account is Deactivated"
+								Message("Login Failed", msg, "Please register again")
+							}
 						}
 					case 2:
 						var newUsers models.Users
@@ -197,8 +200,6 @@ func main() {
 					callClear()
 
 					fmt.Println("\t--Update Profile--")
-
-					fmt.Println("Profile", currentUser.Name)
 					fmt.Println("=========================")
 					fmt.Printf("Name: %s\nAddress: %s\nNumber Phone: %s\nEmail: %s", currentUser.Name, currentUser.Address, currentUser.Phone_number, currentUser.Email)
 					fmt.Println("\n=========================")
@@ -275,24 +276,25 @@ func main() {
 							if currentUser.Password == oldPassword {
 								if newPassword == rePassword {
 									currentUser.Password = newPassword
+									resUpdateUser, err := userControl.Edit(currentUser)
+									if err != nil {
+										ErrorMsg(showError, "Error on Updating Password", "Please try again.", err.Error())
+									}
+									Message("Success", "Updating New Password", resUpdateUser)
+
 									isChangePassword = false
+									updateProfile = false
+									isLoggedIn = false
+									currentUser = model.Users{}
 								} else {
-									fmt.Println("New Password is not match")
+									Message("Failed", "New Password is not match", "Please try again")
+									callClear()
 								}
 							} else {
-								fmt.Println("Old Password is not correct")
+								Message("Failed", "Old Password is not correct", "Please try again")
+								isChangePassword = false
 							}
 						}
-
-						resUpdateUser, err := userControl.Edit(currentUser)
-						if err != nil {
-							ErrorMsg(showError, "Error on Updating Password", "Please try again.", err.Error())
-						}
-						Message("Success", "Updating New Password", resUpdateUser)
-
-						updateProfile = false
-						isLoggedIn = false
-						currentUser = model.Users{}
 					case 5:
 						callClear()
 						fmt.Println("\t--Status Account--")
@@ -313,9 +315,10 @@ func main() {
 								isDeactivateAcc = false
 								updateProfile = false
 								isLoggedIn = false
+								currentUser = model.Users{}
 								callClear()
 							} else if yesNo == "N" || yesNo == "n" {
-								isDeactivateAcc = true
+								isDeactivateAcc = false
 								updateProfile = false
 								callClear()
 							} else {
@@ -547,6 +550,6 @@ func ErrorMsg(_isShow bool, _title, _content, _detail interface{}) {
 		fmt.Println("=== ", _title, " ===")
 		fmt.Println(_content)
 	}
-	fmt.Println("Tekan Enter untuk melanjutkan.")
+	fmt.Println("\nTekan Enter untuk melanjutkan.")
 	fmt.Scanln(&next)
 }
