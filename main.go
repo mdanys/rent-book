@@ -48,6 +48,8 @@ func main() {
 	userControl := controllers.UsersControl{Model: userModel}
 	bookModel := models.BooksModel{DB: gconn}
 	bookControl := controllers.BooksControl{Model: bookModel}
+	lendModel := models.LendsModel{DB: gconn}
+	lendControl := controllers.LendsControl{Model: lendModel}
 
 	if err != nil {
 		fmt.Println("Can't connect to DB", err.Error())
@@ -361,93 +363,97 @@ func main() {
 						}
 					}
 				case 2:
-					// Borrow := true
-					// for Borrow {
-					// 	callClear()
-					// 	var inputBookNumber int
+					Borrow := true
+					for Borrow {
+						fmt.Println("\t--Borrow--")
+						fmt.Println("1. Search Book")
+						fmt.Println("2. List of Books")
+						fmt.Println("3. List of Borrowed Books")
+						fmt.Println("===================")
+						fmt.Println("9. Back")
+						fmt.Println("0. Main Menu")
+						fmt.Print("Enter Your Input: ")
+						fmt.Scanln(&inputMenu)
 
-					// 	fmt.Println("\t--Borrow--")
+						switch inputMenu {
+						case 1:
+						case 2:
+						case 3:
+							callClear()
+							var inputBookNumber int
 
-					// 	result, err := bookControl.GetAll()
-					// 	if err != nil {
-					// 		//Message("Pencarian Buku Gagal", "Buku tidak di temukan", err.Error())
-					// 	}
+							result, err := lendControl.GetUserBookBorrow(currentUser.ID)
+							if err != nil {
+								Message("Get Borrowed List Failed", "Failed to retieve Borrowed List", err.Error())
+							}
 
-					// 	fmt.Println("List My Borrowed Books")
-					// 	fmt.Println("==================================")
-					// 	fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status")
+							fmt.Println("List of My Borrowed Books")
+							fmt.Println("==================================")
+							fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Book Owner")
 
-					// 	if result != nil {
-					// 		i := 1
-					// 		var status string
-					// 		for _, value := range result {
-					// 			if value.Is_Borrowed {
-					// 				status = "Not Available"
-					// 			} else {
-					// 				status = "Available"
-					// 			}
-					// 			fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", i, value.ID, value.Title, value.Author, status)
-					// 			i++
-					// 		}
-					// 	} else {
-					// 		fmt.Println("\n\t\\tt Book Title not Found")
-					// 	}
+							if result != nil {
+								i := 1
+								for _, value := range result {
+									fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", i, value.ID, value.Book_title, value.Book_author, value.Book_owner_name)
+									i++
+								}
+							} else {
+								fmt.Println("\n\t\\tt Book Title not Found")
+							}
 
-					// 	fmt.Println("\n==============================")
-					// 	fmt.Println("1. Choose the book to be returned")
-					// 	fmt.Println("9. Back")
-					// 	fmt.Println("0. Main Menu")
-					// 	fmt.Print("Enter Your Input: ")
-					// 	fmt.Scanln(&inputMenu)
-					// 	switch inputMenu {
-					// 	case 1:
-					// 		fmt.Println("== Choose Number To Be Returned ==")
-					// 		fmt.Scanln(&inputBookNumber)
+							fmt.Println("\n==============================")
+							fmt.Println("1. Choose the book to be returned")
+							fmt.Println("9. Back")
+							fmt.Println("0. Main Menu")
+							fmt.Print("Enter Your Input: ")
+							fmt.Scanln(&inputMenu)
+							switch inputMenu {
+							case 1:
+								fmt.Println("== Choose Number To Be Returned ==")
+								fmt.Scanln(&inputBookNumber)
 
-					// 		var targetedBook model.Books = result[inputBookNumber-1]
+								var targetedLend model.Lends = result[inputBookNumber-1]
 
-					// 		callClear()
-					// 		fmt.Println("List My Borrowed Books")
-					// 		fmt.Println("==================================")
-					// 		fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status")
+								callClear()
+								fmt.Println("List My Borrowed Books")
+								fmt.Println("==================================")
+								fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Book Owner")
 
-					// 		var status string
-					// 		if targetedBook.Is_Borrowed {
-					// 			status = "Not Available"
-					// 		} else {
-					// 			status = "Available"
-					// 		}
-					// 		fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", 1, targetedBook.ID, targetedBook.Title, targetedBook.Author, status)
+								fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", 1, targetedLend.ID, targetedLend.Book_title, targetedLend.Book_author, targetedLend.Book_owner_name)
 
-					// 		fmt.Println("\n==============================")
+								fmt.Println("\n==============================")
 
-					// 		isNotYesNo := true
-					// 		for isNotYesNo {
-					// 			fmt.Println("Are you sure to Return this book? (y/n)")
-					// 			fmt.Scanln(&yesNo)
-					// 			if yesNo == "Y" || yesNo == "y" {
-					// 				resultReturn, err := bookControl.Delete(targetedBook)
-					// 				if err != nil {
-					// 					Message("Failed", "Returning Book Failed", resultReturn)
-					// 					fmt.Println("", err.Error())
-					// 				}
-					// 				Message("Success", "Returning Book Success", resultReturn)
+								isNotYesNo := true
+								for isNotYesNo {
+									fmt.Println("Are you sure to Return this book? (y/n)")
+									fmt.Scanln(&yesNo)
+									if yesNo == "Y" || yesNo == "y" {
+										resultReturn, err := lendControl.Model.ReturnBook(targetedLend)
+										if err != nil {
+											Message("Failed", "Returning Book Failed", resultReturn)
+											fmt.Println("", err.Error())
+										}
+										Message("Success", "Returning Book Success", resultReturn)
 
-					// 				isNotYesNo = false
-					// 				Borrow = false
-					// 				callClear()
-					// 			} else if yesNo == "N" || yesNo == "n" {
-					// 				isNotYesNo = false
-					// 				Borrow = false
-					// 				callClear()
-					// 			} else {
-					// 				isNotYesNo = true
-					// 			}
-					// 		}
-					// 	case 9:
-					// 	case 0:
-					// 	}
-					// }
+										isNotYesNo = false
+										Borrow = false
+										callClear()
+									} else if yesNo == "N" || yesNo == "n" {
+										isNotYesNo = false
+										Borrow = false
+										callClear()
+									} else {
+										isNotYesNo = true
+									}
+								}
+							case 9:
+							case 0:
+							}
+						case 9:
+						case 0:
+
+						}
+					}
 				case 9:
 				case 0:
 				}
