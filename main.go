@@ -110,6 +110,25 @@ func main() {
 				case 2:
 				}
 			case 2:
+				callClear()
+				fmt.Println("\t== List of Book ==")
+				result, err := bookControl.GetAll()
+				if err != nil {
+					ErrorMsg(showError, "Searching Book Failed", "Book not found or failed to retrieve data.", err.Error())
+				}
+				fmt.Println("==================================")
+				fmt.Printf("%4s | %5s | %25s | %25s | %5s |\n", "No", "Book Id", "Title", "Author", "ID Owner")
+
+				if result != nil {
+					i := 1
+					for _, value := range result {
+						fmt.Printf("%4d | %5d | %25s | %25s | %5d |\n", i, value.ID, value.Title, value.Author, value.IDUser)
+						i++
+					}
+				} else {
+					fmt.Println("\n\t\\tt Book Title not Found")
+				}
+				Message("Done", "", "")
 			case 3:
 				isLoginRegisterMenu := true
 
