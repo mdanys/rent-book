@@ -36,3 +36,21 @@ func (uc UsersControl) Create(newUser model.Users) (model.Users, error) {
 	}
 	return result, nil
 }
+
+func (uc UsersControl) Edit(updatedUsers model.Users) (model.Users, error) {
+	result, err := uc.Model.Edit(updatedUsers)
+	if err != nil {
+		log.Println("Error on Edit", err.Error())
+		return model.Users{}, err
+	}
+	return result, nil
+}
+
+func (uc UsersControl) GetActive(_isActive bool) ([]model.Users, error) {
+	result, err := uc.Model.GetActive(_isActive)
+	if err != nil {
+		fmt.Println("Error on GetActive", err.Error())
+		return nil, err
+	}
+	return result, nil
+}

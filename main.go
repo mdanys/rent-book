@@ -189,10 +189,9 @@ func main() {
 			case 1:
 			case 2:
 			case 3:
-				Update_Profile := true
-				for Update_Profile {
+				updateProfile := true
+				for updateProfile {
 					callClear()
-					var inputEditNumber int
 
 					fmt.Println("\t--Update Profile--")
 
@@ -213,10 +212,113 @@ func main() {
 					fmt.Scanln(&inputMenu)
 					switch inputMenu {
 					case 1:
+						callClear()
+						fmt.Println("\t--Edit Name--")
+						fmt.Println("================")
+						fmt.Printf("Name: %s", currentUser.Name)
+						fmt.Println("\n================")
+						fmt.Println("Input New Name :")
+						fmt.Scanln(&currentUser.Name)
+						resUpdateUser, err := userControl.Edit(currentUser)
+						if err != nil {
+							ErrorMsg(showError, "Error on Updating Name", "Please try again.", err.Error())
+						}
+						Message("Success", "Updating New Name Success", resUpdateUser)
+
+						updateProfile = false
 					case 2:
+						callClear()
+						fmt.Println("\t--Edit Address--")
+						fmt.Println("================")
+						fmt.Printf("Address: %s", currentUser.Address)
+						fmt.Println("\n================")
+						fmt.Println("Input New Address :")
+						fmt.Scanln(&currentUser.Address)
+						resUpdateUser, err := userControl.Edit(currentUser)
+						if err != nil {
+							ErrorMsg(showError, "Error on Updating Address", "Please try again.", err.Error())
+						}
+						Message("Success", "Updating New Address Success", resUpdateUser)
+
+						updateProfile = false
 					case 3:
+						callClear()
+						fmt.Println("\t--Edit Phone Number--")
+						fmt.Println("================")
+						fmt.Printf("Address: %s", currentUser.Phone_number)
+						fmt.Println("\n================")
+						fmt.Println("Input New Phone Number :")
+						fmt.Scanln(&currentUser.Phone_number)
+						resUpdateUser, err := userControl.Edit(currentUser)
+						if err != nil {
+							ErrorMsg(showError, "Error on Updating Phone Number", "Please try again.", err.Error())
+						}
+						Message("Success", "Updating New Phone Number Success", resUpdateUser)
+
+						updateProfile = false
 					case 4:
+						callClear()
+						var oldPassword, newPassword, rePassword string
+						isChangePassword := true
+						for isChangePassword {
+							fmt.Println("\t--Change Password--")
+							fmt.Println("================")
+							fmt.Println("Input Your Old Password")
+							fmt.Scanln(&oldPassword)
+							fmt.Println("Input Your New Password")
+							fmt.Scanln(&newPassword)
+							fmt.Println("Re-enter Your New Password")
+							fmt.Scanln(&rePassword)
+							if currentUser.Password == oldPassword {
+								if newPassword == rePassword {
+									currentUser.Password = newPassword
+									isChangePassword = false
+								} else {
+									fmt.Println("New Password is not match")
+								}
+							} else {
+								fmt.Println("Old Password is not correct")
+							}
+						}
+
+						resUpdateUser, err := userControl.Edit(currentUser)
+						if err != nil {
+							ErrorMsg(showError, "Error on Updating Password", "Please try again.", err.Error())
+						}
+						Message("Success", "Updating New Password", resUpdateUser)
+
+						updateProfile = false
+						isLoggedIn = false
+						currentUser = model.Users{}
 					case 5:
+						callClear()
+						fmt.Println("\t--Status Account--")
+						fmt.Println("================")
+						fmt.Printf("Status: %t", currentUser.Is_Active)
+						fmt.Println("\n================")
+						isDeactivateAcc := true
+						for isDeactivateAcc {
+							fmt.Println("\nAre you sure want to Deactivate Your Account? (Y/N)")
+							fmt.Scanln(&yesNo)
+							if yesNo == "Y" || yesNo == "y" {
+								currentUser.Is_Active = false
+								resUpdateUser, err := userControl.Edit(currentUser)
+								if err != nil {
+									ErrorMsg(showError, "Error on Deactivating Account", "Please try again.", err.Error())
+								}
+								Message("Success", "Deactivate Account Success", resUpdateUser)
+								isDeactivateAcc = false
+								updateProfile = false
+								isLoggedIn = false
+								callClear()
+							} else if yesNo == "N" || yesNo == "n" {
+								isDeactivateAcc = true
+								updateProfile = false
+								callClear()
+							} else {
+								isDeactivateAcc = true
+							}
+						}
 					case 9:
 					case 0:
 					}
