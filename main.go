@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"rent-book/controllers"
@@ -14,7 +13,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var showError bool = true
 var isRunning bool = true
 var isLoggedIn bool = false
 var currentUser models.Users
@@ -85,7 +83,7 @@ func main() {
 
 					result, err := bookControl.GetWhere(currentBook.Title)
 					if err != nil {
-						ErrorMsg(showError, "Searching Book Failed", "Book not found or failed to retrieve data.", err.Error())
+						//Message("Pencarian Buku Gagal", "Buku tidak di temukan", err.Error())
 					}
 
 					fmt.Println("Tabel Pencarian Buku")
@@ -110,70 +108,67 @@ func main() {
 				}
 			case 2:
 			case 3:
-				isLoginRegisterMenu := true
-
-				for isLoginRegisterMenu {
-
+				callClear()
+				fmt.Println("\t--Login/Register--")
+				fmt.Println("1. Login")
+				fmt.Println("2. Register")
+				fmt.Println("9. Back")
+				fmt.Println("0. Main Menu")
+				fmt.Print("Enter Your Input: ")
+				fmt.Scanln(&inputMenu)
+				switch inputMenu {
+				case 1:
 					callClear()
-					fmt.Println("\t--Login/Register--")
-					fmt.Println("1. Login")
-					fmt.Println("2. Register")
-					fmt.Println("9. Back")
-					fmt.Println("0. Main Menu")
-					fmt.Print("Enter Your Input: ")
-					fmt.Scanln(&inputMenu)
-					switch inputMenu {
-					case 1:
-						callClear()
-						fmt.Println("\t--Login--")
-						fmt.Println("Email:")
-						fmt.Scanln(&currentUser.Email)
-						fmt.Println("Password:")
-						fmt.Scanln(&currentUser.Password)
+					fmt.Println("\t--Login--")
+					fmt.Println("Email:")
+					fmt.Scanln(&currentUser.Email)
+					fmt.Println("Password:")
+					fmt.Scanln(&currentUser.Password)
 
-						result, err := userControl.Get(currentUser.Email, currentUser.Password)
-						if err != nil {
-							ErrorMsg(showError, "Login Failed", "Wrong Email or Password. Please try again.", err.Error())
-						}
-						if result != nil {
-							isLoggedIn = true
-							currentUser = result[0]
-							msg := "Login Sukses, Selamat Datang " + currentUser.Name
-							Message("Login Success", msg, "Move to Homepage Member")
-							fmt.Scanln(&next)
-							isLoginRegisterMenu = false
-						}
-					case 2:
-						var newUsers models.Users
-						callClear()
-						fmt.Println("\t--Register--")
-						fmt.Println("Input Name:")
-						fmt.Scanln(&newUsers.Name)
-						fmt.Println("Input Address:")
-						fmt.Scanln(&newUsers.Address)
-						fmt.Println("Input Phone:")
-						fmt.Scanln(&newUsers.Phone_number)
-						fmt.Println("Input Email:")
-						fmt.Scanln(&newUsers.Email)
-						fmt.Println("Input Password:")
-						fmt.Scanln(&newUsers.Password)
-
-						newUsers.Is_Active = true
-
-						result, err := userControl.Create(newUsers)
-						if err != nil {
-							ErrorMsg(showError, "User Registration Failed", "Please try again.", err.Error())
-						}
-
-						msg := "User " + result.Email + " success registered."
-						Message("User Registration Success", msg, "")
-					case 9:
-						Message("Kembali", "Ke Menu Sebelumnya...", "")
-						isLoginRegisterMenu = false
+					result, err := userControl.Get(currentUser.Email, currentUser.Password)
+					if err != nil {
+						Message("Login Gagal", "Email atau Password Salah.", err.Error())
 					}
+					if result != nil {
+						isLoggedIn = true
+						currentUser = result[0]
+						fmt.Println("Login Sukses, Selamat Datang ", currentUser.Name)
+						fmt.Println("Tekan Enter untuk ke Menu Member")
+						fmt.Scanln(&next)
+					}
+
+				case 2:
+					var newUsers models.Users
+					callClear()
+					fmt.Println("\t--Register--")
+					fmt.Println("Input Name:")
+					fmt.Scanln(&newUsers.Name)
+					fmt.Println("Input Address:")
+					fmt.Scanln(&newUsers.Address)
+					fmt.Println("Input Phone:")
+					fmt.Scanln(&newUsers.Phone_number)
+					fmt.Println("Input Email:")
+					fmt.Scanln(&newUsers.Email)
+					fmt.Println("Input Password:")
+					fmt.Scanln(&newUsers.Password)
+
+					newUsers.Is_Active = true
+
+					result, err := userControl.Create(newUsers)
+					if err != nil {
+						fmt.Println("Error on Adding User", err.Error())
+
+					}
+					// fmt.Println("Input :", newUsers)
+					fmt.Println("\nRegistration User Success.", result)
+				case 9:
+					fmt.Println("Terima Kasih")
+					fmt.Println("Program keluar..")
+					isRunning = false
 				}
 			case 9:
-				Message("Terima Kasih", "Program Keluar ...", "")
+				fmt.Println("Terima Kasih")
+				fmt.Println("Program keluar..")
 				isRunning = false
 			}
 		} else {
@@ -232,10 +227,10 @@ func main() {
 
 						result, err := bookControl.Add(newBook)
 						if err != nil {
-							ErrorMsg(showError, "Add Book Failed", "Failed to Add Book. Please try again.", err.Error())
+							fmt.Println("Error on Adding Book", err.Error())
 						}
-
-						Message("Add Book Success", "Book "+result.Title+" Added.", "")
+						// fmt.Println("Input :", newUsers)
+						fmt.Println("\nAdding Book Success", result)
 					case 2:
 						listMyBookMenu := true
 						for listMyBookMenu {
@@ -245,9 +240,9 @@ func main() {
 
 							fmt.Println("\t--List My Book--")
 
-							result, err := bookControl.GetUserBooks(currentBook.ID)
+							result, err := bookControl.GetAll()
 							if err != nil {
-								ErrorMsg(showError, "Failed Retrieve List Books", "Please try again.", err.Error())
+								//Message("Pencarian Buku Gagal", "Buku tidak di temukan", err.Error())
 							}
 
 							fmt.Println("List My Book Table")
@@ -311,7 +306,7 @@ func main() {
 									fmt.Scanln(&targetedBook.Title)
 									resUpdateBook, err := bookControl.Edit(targetedBook)
 									if err != nil {
-										ErrorMsg(showError, "Error on Updating Book", "Please try again.", err.Error())
+										fmt.Println("Error on Updating Book", err.Error())
 									}
 									Message("Success", "Adding Book Success", resUpdateBook)
 
@@ -323,7 +318,7 @@ func main() {
 									fmt.Scanln(&targetedBook.Author)
 									resUpdateBook, err := bookControl.Edit(targetedBook)
 									if err != nil {
-										ErrorMsg(showError, "Error on Updating Book", "Please try again", err.Error())
+										fmt.Println("Error on Updating Book", err.Error())
 									}
 									Message("Success", "Adding Book Success", resUpdateBook)
 
@@ -339,7 +334,7 @@ func main() {
 										if yesNo == "Y" || yesNo == "y" {
 											resultDelete, err := bookControl.Delete(targetedBook)
 											if err != nil {
-												ErrorMsg(showError, "Failed", "Deleting Book Failed", resultDelete)
+												Message("Failed", "Deleting Book Failed", resultDelete)
 												fmt.Println("", err.Error())
 											}
 											Message("Success", "Deleting Book Success", resultDelete)
@@ -366,6 +361,95 @@ func main() {
 						}
 					}
 				case 2:
+					// Borrow := true
+					// for Borrow {
+					// 	callClear()
+					// 	var inputBookNumber int
+
+					// 	fmt.Println("\t--Borrow--")
+
+					// 	result, err := bookControl.GetAll()
+					// 	if err != nil {
+					// 		//Message("Pencarian Buku Gagal", "Buku tidak di temukan", err.Error())
+					// 	}
+
+					// 	fmt.Println("List My Borrowed Books")
+					// 	fmt.Println("==================================")
+					// 	fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status")
+
+					// 	if result != nil {
+					// 		i := 1
+					// 		var status string
+					// 		for _, value := range result {
+					// 			if value.Is_Borrowed {
+					// 				status = "Not Available"
+					// 			} else {
+					// 				status = "Available"
+					// 			}
+					// 			fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", i, value.ID, value.Title, value.Author, status)
+					// 			i++
+					// 		}
+					// 	} else {
+					// 		fmt.Println("\n\t\\tt Book Title not Found")
+					// 	}
+
+					// 	fmt.Println("\n==============================")
+					// 	fmt.Println("1. Choose the book to be returned")
+					// 	fmt.Println("9. Back")
+					// 	fmt.Println("0. Main Menu")
+					// 	fmt.Print("Enter Your Input: ")
+					// 	fmt.Scanln(&inputMenu)
+					// 	switch inputMenu {
+					// 	case 1:
+					// 		fmt.Println("== Choose Number To Be Returned ==")
+					// 		fmt.Scanln(&inputBookNumber)
+
+					// 		var targetedBook model.Books = result[inputBookNumber-1]
+
+					// 		callClear()
+					// 		fmt.Println("List My Borrowed Books")
+					// 		fmt.Println("==================================")
+					// 		fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status")
+
+					// 		var status string
+					// 		if targetedBook.Is_Borrowed {
+					// 			status = "Not Available"
+					// 		} else {
+					// 			status = "Available"
+					// 		}
+					// 		fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", 1, targetedBook.ID, targetedBook.Title, targetedBook.Author, status)
+
+					// 		fmt.Println("\n==============================")
+
+					// 		isNotYesNo := true
+					// 		for isNotYesNo {
+					// 			fmt.Println("Are you sure to Return this book? (y/n)")
+					// 			fmt.Scanln(&yesNo)
+					// 			if yesNo == "Y" || yesNo == "y" {
+					// 				resultReturn, err := bookControl.Delete(targetedBook)
+					// 				if err != nil {
+					// 					Message("Failed", "Returning Book Failed", resultReturn)
+					// 					fmt.Println("", err.Error())
+					// 				}
+					// 				Message("Success", "Returning Book Success", resultReturn)
+
+					// 				isNotYesNo = false
+					// 				Borrow = false
+					// 				callClear()
+					// 			} else if yesNo == "N" || yesNo == "n" {
+					// 				isNotYesNo = false
+					// 				Borrow = false
+					// 				callClear()
+					// 			} else {
+					// 				isNotYesNo = true
+					// 			}
+					// 		}
+					// 	case 9:
+					// 	case 0:
+					// 	}
+					// }
+				case 9:
+				case 0:
 				}
 			case 9:
 				var isNotYesNo bool = true
@@ -398,21 +482,6 @@ func Message(_title, _content, _detail interface{}) {
 	fmt.Println("=== ", _title, " ===")
 	fmt.Println(_content)
 	fmt.Println(_detail)
-	fmt.Println("Tekan Enter untuk melanjutkan.")
-	fmt.Scanln(&next)
-}
-
-func ErrorMsg(_isShow bool, _title, _content, _detail interface{}) {
-	var next string
-	if _isShow {
-		fmt.Println("=== SHOW ERROR LOG ===")
-		fmt.Println("=== ", _title, " ===")
-		fmt.Println(_content)
-		log.Println(_detail)
-	} else {
-		fmt.Println("=== ", _title, " ===")
-		fmt.Println(_content)
-	}
 	fmt.Println("Tekan Enter untuk melanjutkan.")
 	fmt.Scanln(&next)
 }
