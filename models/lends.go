@@ -29,16 +29,6 @@ func (lm LendsModel) GetUserBorrow(_IDUser uint) ([]Books, error) {
 	return result, nil
 }
 
-func (bm BooksModel) GetBorrowed() ([]Books, error) {
-	var result []Books
-	err := bm.DB.Where(&Books{}).Find(&result).Error
-	if err != nil {
-		fmt.Println("Error on Query", err.Error())
-		return nil, err
-	}
-	return result, nil
-}
-
 // type BooksUsers struct {
 // 	BooksID   int `gorm:"primaryKey"`
 // 	UsersID   int `gorm:"primaryKey"`
