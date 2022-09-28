@@ -43,6 +43,16 @@ func (um UsersModel) Get(_email, _password string) ([]Users, error) {
 	return result, nil
 }
 
+func (um UsersModel) GetById(_userId uint) (Users, error) {
+	var result Users
+	err := um.DB.First(&result, _userId).Error
+	if err != nil {
+		log.Println("Error on Query Get User By Id", err.Error())
+		return Users{}, err
+	}
+	return result, nil
+}
+
 func (um UsersModel) Create(newUser Users) (Users, error) {
 	err := um.DB.Save(&newUser).Error
 	if err != nil {

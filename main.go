@@ -7,6 +7,7 @@ import (
 	"rent-book/controllers"
 	"rent-book/models"
 	model "rent-book/models"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
@@ -37,6 +38,7 @@ func callClear() {
 func migrate(db *gorm.DB) {
 	db.AutoMigrate(&model.Users{})
 	db.AutoMigrate(&model.Books{})
+	db.AutoMigrate(&model.Lends{})
 }
 
 func main() {
@@ -378,6 +380,99 @@ func main() {
 						switch inputMenu {
 						case 1:
 						case 2:
+							isListAvailableBook := true
+							for isListAvailableBook {
+
+								callClear()
+
+								fmt.Println("\t--List Available Book--")
+
+								result, err := bookControl.GetAll()
+								if err != nil {
+									Message("Failed Get Avaialble Book", "Failed Retrieve Data", err.Error())
+								}
+
+								fmt.Println("List Available Book Table")
+								fmt.Println("==================================")
+								fmt.Printf("%4s | %5s | %15s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status", "Owner")
+
+								if result != nil {
+									i := 1
+									var status string
+									for _, value := range result {
+										if value.Is_Borrowed {
+											status = "Not Available"
+										} else {
+											status = "Available"
+										}
+										fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", i, value.ID, value.Title, value.Author, status)
+										i++
+									}
+								} else {
+									fmt.Println("\n\t\\tt Book Title not Found")
+								}
+								fmt.Println("\n==============================")
+								fmt.Println("1. Choose Book Number to Borrow Book")
+								fmt.Println("9. Back")
+								fmt.Println("0. Main Menu")
+								fmt.Print("Enter Your Input: ")
+								fmt.Scanln(&inputMenu)
+								switch inputMenu {
+								case 1:
+									var inputBookNumber int
+									fmt.Println("== Choose Number to Borrow Book ==")
+									fmt.Scanln(&inputBookNumber)
+
+									var targetedBook model.Books = result[inputBookNumber-1]
+
+									fmt.Println("Are you sure want to borrow this book? (Y/N)")
+									ViewDetailBook(targetedBook)
+
+									var isNotYesNo bool = true
+
+									for isNotYesNo {
+										fmt.Scanln(&yesNo)
+										if yesNo == "Y" || yesNo == "y" {
+											isNotYesNo = false
+
+											ownerData, err := userControl.GetById(targetedBook.IDUser)
+											if err != nil {
+												fmt.Println("Failed Retrieve Book's Owner Data.")
+											}
+											var newLend model.Lends
+											newLend.Return_date = time.Time{}
+											newLend.Is_returned = false
+											newLend.Book_owner_id = ownerData.ID
+											newLend.Book_owner_email = ownerData.Email
+											newLend.Book_owner_name = ownerData.Name
+											newLend.Book_owner_address = ownerData.Address
+											newLend.Book_owner_phone = ownerData.Phone_number
+											newLend.Book_title = targetedBook.Title
+											newLend.Book_author = targetedBook.Author
+											newLend.IDUser = currentUser.ID
+											newLend.IDBook = currentBook.ID
+
+											resBorrowBook, err := lendControl.AddLend(newLend)
+
+											if err != nil {
+												fmt.Println("Error on Borrow Book", err.Error())
+											}
+											Message("Success Borrow Book", "Success Add Borrowed Book : "+resBorrowBook.Book_title, "")
+											isNotYesNo = false
+
+										} else if yesNo == "N" || yesNo == "n" {
+											isNotYesNo = false
+											callClear()
+										} else {
+											isNotYesNo = true
+										}
+									}
+								case 9:
+									isListAvailableBook = false
+								case 0:
+
+								}
+							}
 						case 3:
 							callClear()
 							var inputBookNumber int
@@ -490,4 +585,20 @@ func Message(_title, _content, _detail interface{}) {
 	fmt.Println(_detail)
 	fmt.Println("Tekan Enter untuk melanjutkan.")
 	fmt.Scanln(&next)
+}
+
+func ViewDetailBook(_bookData model.Books) {
+
+	var bookStatus string
+	if _bookData.Is_Borrowed {
+		bookStatus = "Not Available"
+	} else {
+		bookStatus = "Available"
+	}
+
+	fmt.Println("========================")
+	fmt.Println("======Book Detail======")
+	fmt.Println("Book Title : ", _bookData.Title)
+	fmt.Println("Book Author : ", _bookData.Author)
+	fmt.Println("Book Status : ", bookStatus)
 }
