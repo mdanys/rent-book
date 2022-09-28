@@ -51,3 +51,22 @@ func (um UsersModel) Create(newUser Users) (Users, error) {
 	}
 	return newUser, nil
 }
+
+func (um UsersModel) Edit(updatedUsers Users) (Users, error) {
+	err := um.DB.Save(&updatedUsers).Error
+	if err != nil {
+		fmt.Println("Error on Edit", err.Error())
+		return Users{}, err
+	}
+	return updatedUsers, nil
+}
+
+func (um UsersModel) GetActive(_isActive bool) ([]Users, error) {
+	var result []Users
+	err := um.DB.Where(&Users{Is_Active: _isActive}).Find(&result).Error
+	if err != nil {
+		fmt.Println("Error on Query", err.Error())
+		return nil, err
+	}
+	return result, nil
+}
