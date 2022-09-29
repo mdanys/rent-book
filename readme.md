@@ -27,11 +27,20 @@ For user that not login, you can search and look of the available book list. And
 - Base on : [Golang go1.17.7 windows/amd64](https://go.dev/)
 - Text Editor : [Visual Studio Code](https://code.visualstudio.com/)
 - Console : [Git Bash](https://git-scm.com/download/win)
-- ORM Library : [GORM](https://gorm.io/)
+- ORM Library : [GORM v1.23.8](https://gorm.io/gorm)
 - Database : MySQL 10.4.11-MariaDB [XAMPP v3.2.4](https://www.apachefriends.org/download.html)
-- Other Modules or Plugins :
+- Other Modules, Package or Plugins :
+  - [Go MySQL Driver](github.com/go-sql-driver/mysql v1.6.0)
+  - [GORM MYSQL Driver](gorm.io/driver/mysql v1.3.6)
   - Git Lens
   - Git Graph
+  - Golang Package :
+    - "fmt"
+    - "log"
+    - "os"
+    - "os/exec"
+    - "reflect"
+    - "time"
 
 ## How to install and Run the Project
 
