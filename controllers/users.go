@@ -28,6 +28,15 @@ func (uc UsersControl) Get(_username, _password string) ([]model.Users, error) {
 	return result, nil
 }
 
+func (uc UsersControl) GetById(_userId uint) (model.Users, error) {
+	result, err := uc.Model.GetById(_userId)
+	if err != nil {
+		log.Println("Error on GetById", err.Error())
+		return model.Users{}, err
+	}
+	return result, nil
+}
+
 func (uc UsersControl) Create(newUser model.Users) (model.Users, error) {
 	result, err := uc.Model.Create(newUser)
 	if err != nil {

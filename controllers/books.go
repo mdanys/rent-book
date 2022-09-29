@@ -19,6 +19,15 @@ func (bc BooksControl) GetAll() ([]model.Books, error) {
 	return result, nil
 }
 
+func (bc BooksControl) GetAllAvailable() ([]model.Books, error) {
+	result, err := bc.Model.GetAllAvailable()
+	if err != nil {
+		fmt.Println("Error on GetAll", err.Error())
+		return nil, err
+	}
+	return result, nil
+}
+
 func (bc BooksControl) GetWhere(_title string) ([]model.Books, error) {
 	result, err := bc.Model.GetWhere(_title)
 	if err != nil {
@@ -33,6 +42,15 @@ func (bc BooksControl) GetUserBooks(_IDUser uint) ([]model.Books, error) {
 	if err != nil {
 		fmt.Println("Error on GetWhere", err.Error())
 		return nil, err
+	}
+	return result, nil
+}
+
+func (bc BooksControl) GetById(_IDBook uint) (model.Books, error) {
+	result, err := bc.Model.GetById(_IDBook)
+	if err != nil {
+		fmt.Println("Error on GetWhere", err.Error())
+		return model.Books{}, err
 	}
 	return result, nil
 }

@@ -5,9 +5,11 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"reflect"
 	"rent-book/controllers"
 	"rent-book/models"
 	model "rent-book/models"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
@@ -39,6 +41,7 @@ func callClear() {
 func migrate(db *gorm.DB) {
 	db.AutoMigrate(&model.Users{})
 	db.AutoMigrate(&model.Books{})
+	db.AutoMigrate(&model.Lends{})
 }
 
 func main() {
@@ -49,8 +52,8 @@ func main() {
 	userControl := controllers.UsersControl{Model: userModel}
 	bookModel := models.BooksModel{DB: gconn}
 	bookControl := controllers.BooksControl{Model: bookModel}
-	// lendModel := models.LendsModel{DB: gconn}
-	// lendControl := controllers.LendsControl{Model: lendModel}
+	lendModel := models.LendsModel{DB: gconn}
+	lendControl := controllers.LendsControl{Model: lendModel}
 
 	if err != nil {
 		fmt.Println("Can't connect to DB", err.Error())
@@ -111,19 +114,25 @@ func main() {
 				}
 			case 2:
 				callClear()
-				fmt.Println("\t== List of Book ==")
 				result, err := bookControl.GetAll()
 				if err != nil {
 					ErrorMsg(showError, "Searching Book Failed", "Book not found or failed to retrieve data.", err.Error())
 				}
-				fmt.Println("==================================")
-				fmt.Printf("%4s | %5s | %25s | %25s | %5s |\n", "No", "Book Id", "Title", "Author", "ID Owner")
+				var title string = fmt.Sprintf("%4s | %s | %s | %25s | %5s |\n", "No", "Book Id", fmt.Sprintf("%*s", 25, "Title"), "Author", "ID Owner")
+				rowLen := len(title)
 
+				fmt.Println("== List of Book ==")
+				fmt.Print(title)
+				for i := 0; i < rowLen; i++ {
+					fmt.Print("=")
+				}
+				fmt.Print("\n")
 				if result != nil {
 					i := 1
 					for _, value := range result {
-						fmt.Printf("%4d | %5d | %25s | %25s | %5d |\n", i, value.ID, value.Title, value.Author, value.IDUser)
+						fmt.Printf("%4d | %s | %25s | %25s | %s |\n", i, fmt.Sprintf("%*d", 7, value.ID), value.Title, value.Author, fmt.Sprintf("%*d", 8, value.IDUser))
 						i++
+
 					}
 				} else {
 					fmt.Println("\n\t\\tt Book Title not Found")
@@ -194,6 +203,9 @@ func main() {
 					case 9:
 						Message("Kembali", "Ke Menu Sebelumnya...", "")
 						isLoginRegisterMenu = false
+					case 0:
+						Message("Kembali", "Ke Menu Sebelumnya...", "")
+						isLoginRegisterMenu = false
 					}
 				}
 			case 9:
@@ -201,347 +213,632 @@ func main() {
 				isRunning = false
 			}
 		} else {
-			fmt.Println("\t--HOMEPAGE MEMBER--")
-			fmt.Println("\tWelcome,", currentUser.Name)
-			fmt.Println("1. Search Books")
-			fmt.Println("2. List of Books")
-			fmt.Println("3. Update Profile")
-			fmt.Println("4. My Library")
-			fmt.Println("===================")
-			fmt.Println("9. Logout")
-			fmt.Print("Enter Your Input: ")
-			fmt.Scanln(&inputMenu)
-
-			switch inputMenu {
-			case 1:
-			case 2:
-			case 3:
-				updateProfile := true
-				for updateProfile {
-					callClear()
-
-					fmt.Println("\t--Update Profile--")
-					fmt.Println("=========================")
-					fmt.Printf("Name: %s\nAddress: %s\nNumber Phone: %s\nEmail: %s", currentUser.Name, currentUser.Address, currentUser.Phone_number, currentUser.Email)
-					fmt.Println("\n=========================")
-
-					fmt.Println("1. Edit Name")
-					fmt.Println("2. Edit Address")
-					fmt.Println("3. Edit Phone Number")
-					fmt.Println("4. Change Password")
-					fmt.Println("5. Deactivate Account")
-					fmt.Println("========================")
-					fmt.Println("9. Back")
-					fmt.Println("0. Main Menu")
-					fmt.Print("Enter Your Input: ")
-					fmt.Scanln(&inputMenu)
-					switch inputMenu {
-					case 1:
-						callClear()
-						fmt.Println("\t--Edit Name--")
-						fmt.Println("================")
-						fmt.Printf("Name: %s", currentUser.Name)
-						fmt.Println("\n================")
-						fmt.Println("Input New Name :")
-						fmt.Scanln(&currentUser.Name)
-						resUpdateUser, err := userControl.Edit(currentUser)
-						if err != nil {
-							ErrorMsg(showError, "Error on Updating Name", "Please try again.", err.Error())
-						}
-						Message("Success", "Updating New Name Success", resUpdateUser)
-
-						updateProfile = false
-					case 2:
-						callClear()
-						fmt.Println("\t--Edit Address--")
-						fmt.Println("================")
-						fmt.Printf("Address: %s", currentUser.Address)
-						fmt.Println("\n================")
-						fmt.Println("Input New Address :")
-						fmt.Scanln(&currentUser.Address)
-						resUpdateUser, err := userControl.Edit(currentUser)
-						if err != nil {
-							ErrorMsg(showError, "Error on Updating Address", "Please try again.", err.Error())
-						}
-						Message("Success", "Updating New Address Success", resUpdateUser)
-
-						updateProfile = false
-					case 3:
-						callClear()
-						fmt.Println("\t--Edit Phone Number--")
-						fmt.Println("================")
-						fmt.Printf("Address: %s", currentUser.Phone_number)
-						fmt.Println("\n================")
-						fmt.Println("Input New Phone Number :")
-						fmt.Scanln(&currentUser.Phone_number)
-						resUpdateUser, err := userControl.Edit(currentUser)
-						if err != nil {
-							ErrorMsg(showError, "Error on Updating Phone Number", "Please try again.", err.Error())
-						}
-						Message("Success", "Updating New Phone Number Success", resUpdateUser)
-
-						updateProfile = false
-					case 4:
-						callClear()
-						var oldPassword, newPassword, rePassword string
-						isChangePassword := true
-						for isChangePassword {
-							fmt.Println("\t--Change Password--")
-							fmt.Println("================")
-							fmt.Println("Input Your Old Password")
-							fmt.Scanln(&oldPassword)
-							fmt.Println("Input Your New Password")
-							fmt.Scanln(&newPassword)
-							fmt.Println("Re-enter Your New Password")
-							fmt.Scanln(&rePassword)
-							if currentUser.Password == oldPassword {
-								if newPassword == rePassword {
-									currentUser.Password = newPassword
-									resUpdateUser, err := userControl.Edit(currentUser)
-									if err != nil {
-										ErrorMsg(showError, "Error on Updating Password", "Please try again.", err.Error())
-									}
-									Message("Success", "Updating New Password", resUpdateUser)
-
-									isChangePassword = false
-									updateProfile = false
-									isLoggedIn = false
-									currentUser = model.Users{}
-								} else {
-									Message("Failed", "New Password is not match", "Please try again")
-									callClear()
-								}
-							} else {
-								Message("Failed", "Old Password is not correct", "Please try again")
-								isChangePassword = false
-							}
-						}
-					case 5:
-						callClear()
-						fmt.Println("\t--Status Account--")
-						fmt.Println("================")
-						fmt.Printf("Status: %t", currentUser.Is_Active)
-						fmt.Println("\n================")
-						isDeactivateAcc := true
-						for isDeactivateAcc {
-							fmt.Println("\nAre you sure want to Deactivate Your Account? (Y/N)")
-							fmt.Scanln(&yesNo)
-							if yesNo == "Y" || yesNo == "y" {
-								currentUser.Is_Active = false
-								resUpdateUser, err := userControl.Edit(currentUser)
-								if err != nil {
-									ErrorMsg(showError, "Error on Deactivating Account", "Please try again.", err.Error())
-								}
-								Message("Success", "Deactivate Account Success", resUpdateUser)
-								isDeactivateAcc = false
-								updateProfile = false
-								isLoggedIn = false
-								currentUser = model.Users{}
-								callClear()
-							} else if yesNo == "N" || yesNo == "n" {
-								isDeactivateAcc = false
-								updateProfile = false
-								callClear()
-							} else {
-								isDeactivateAcc = true
-							}
-						}
-					case 9:
-					case 0:
-					}
-				}
-			case 4:
+			homepageMemberMenu := true
+			for homepageMemberMenu {
 				callClear()
-				fmt.Println("\t--My Library--")
-				fmt.Println("1. My Books")
-				fmt.Println("2. Borrow")
-
+				fmt.Println("\t--HOMEPAGE MEMBER--")
+				fmt.Println("\tWelcome,", currentUser.Name)
+				fmt.Println("1. Search Books")
+				fmt.Println("2. List of Books")
+				fmt.Println("3. Update Profile")
+				fmt.Println("4. My Library")
 				fmt.Println("===================")
-				fmt.Println("9. Back")
-				fmt.Println("0. Main Menu")
+				fmt.Println("9. Logout")
 				fmt.Print("Enter Your Input: ")
 				fmt.Scanln(&inputMenu)
 
 				switch inputMenu {
 				case 1:
-					callClear()
-					fmt.Println("\t--My Books--")
-					fmt.Println("1. Add Book")
-					fmt.Println("2. List My Book")
-
-					fmt.Println("===================")
-					fmt.Println("9. Back")
-					fmt.Println("0. Main Menu")
-					fmt.Print("Enter Your Input: ")
-					fmt.Scanln(&inputMenu)
-					switch inputMenu {
-					case 1:
-						var newBook models.Books
+				case 2:
+				case 3:
+					updateProfile := true
+					for updateProfile {
 						callClear()
-						fmt.Println("\t--Add Book--")
-						fmt.Println("Input Title:")
-						fmt.Scanln(&newBook.Title)
-						fmt.Println("Input Author:")
-						fmt.Scanln(&newBook.Author)
 
-						newBook.Is_Borrowed = false
-						newBook.Is_Deleted = false
-						newBook.IDUser = currentUser.ID
+						fmt.Println("\t--Update Profile--")
+						fmt.Println("=========================")
+						fmt.Printf("Name: %s\nAddress: %s\nNumber Phone: %s\nEmail: %s", currentUser.Name, currentUser.Address, currentUser.Phone_number, currentUser.Email)
+						fmt.Println("\n=========================")
 
-						result, err := bookControl.Add(newBook)
-						if err != nil {
-							ErrorMsg(showError, "Add Book Failed", "Failed to Add Book. Please try again.", err.Error())
-						}
-
-						Message("Add Book Success", "Book "+result.Title+" Added.", "")
-					case 2:
-						listMyBookMenu := true
-						for listMyBookMenu {
-
+						fmt.Println("1. Edit Name")
+						fmt.Println("2. Edit Address")
+						fmt.Println("3. Edit Phone Number")
+						fmt.Println("4. Change Password")
+						fmt.Println("5. Deactivate Account")
+						fmt.Println("========================")
+						fmt.Println("9. Back")
+						fmt.Println("0. Main Menu")
+						fmt.Print("Enter Your Input: ")
+						fmt.Scanln(&inputMenu)
+						switch inputMenu {
+						case 1:
 							callClear()
-							var inputBookNumber int
-
-							fmt.Println("\t--List My Book--")
-
-							result, err := bookControl.GetUserBooks(currentBook.ID)
+							fmt.Println("\t--Edit Name--")
+							fmt.Println("================")
+							fmt.Printf("Name: %s", currentUser.Name)
+							fmt.Println("\n================")
+							fmt.Println("Input New Name :")
+							fmt.Scanln(&currentUser.Name)
+							resUpdateUser, err := userControl.Edit(currentUser)
 							if err != nil {
-								ErrorMsg(showError, "Failed Retrieve List Books", "Please try again.", err.Error())
-							}
-
-							fmt.Println("List My Book Table")
-							fmt.Println("==================================")
-							fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status")
-
-							if result != nil {
-								i := 1
-								var status string
-								for _, value := range result {
-									if value.Is_Borrowed {
-										status = "Not Available"
-									} else {
-										status = "Available"
-									}
-									fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", i, value.ID, value.Title, value.Author, status)
-									i++
-								}
+								ErrorMsg(showError, "Error on Updating Name", "Please try again.", err.Error())
 							} else {
-								fmt.Println("\n\t\\tt Book Title not Found")
+
+								Message("Success", "Updating New Name Success", "Update to "+resUpdateUser.Name)
 							}
 
-							fmt.Println("\n==============================")
-							fmt.Println("1. Choose Number Edit Book Data")
+							updateProfile = false
+						case 2:
+							callClear()
+							fmt.Println("\t--Edit Address--")
+							fmt.Println("================")
+							fmt.Printf("Address: %s", currentUser.Address)
+							fmt.Println("\n================")
+							fmt.Println("Input New Address :")
+							fmt.Scanln(&currentUser.Address)
+							resUpdateUser, err := userControl.Edit(currentUser)
+							if err != nil {
+								ErrorMsg(showError, "Error on Updating Address", "Please try again.", err.Error())
+							} else {
+								Message("Success", "Updating New Address Success", "Update to "+resUpdateUser.Address)
+							}
+
+							updateProfile = false
+						case 3:
+							callClear()
+							fmt.Println("\t--Edit Phone Number--")
+							fmt.Println("================")
+							fmt.Printf("Phone Number: %s", currentUser.Phone_number)
+							fmt.Println("\n================")
+							fmt.Println("Input New Phone Number :")
+							fmt.Scanln(&currentUser.Phone_number)
+							resUpdateUser, err := userControl.Edit(currentUser)
+							if err != nil {
+								ErrorMsg(showError, "Error on Updating Phone Number", "Please try again.", err.Error())
+							} else {
+								Message("Success", "Updating New Phone Number Success", "Update to "+resUpdateUser.Phone_number)
+							}
+
+							updateProfile = false
+						case 4:
+							callClear()
+							var oldPassword, newPassword, rePassword string
+							isChangePassword := true
+							for isChangePassword {
+								fmt.Println("\t--Change Password--")
+								fmt.Println("================")
+								fmt.Println("Input Your Old Password")
+								fmt.Scanln(&oldPassword)
+								fmt.Println("Input Your New Password")
+								fmt.Scanln(&newPassword)
+								fmt.Println("Re-enter Your New Password")
+								fmt.Scanln(&rePassword)
+								if currentUser.Password == oldPassword {
+									if newPassword == rePassword {
+										currentUser.Password = newPassword
+										resUpdateUser, err := userControl.Edit(currentUser)
+										if err != nil {
+											ErrorMsg(showError, "Error on Updating Password", "Please try again.", err.Error())
+										} else {
+											Message("Success", "Updating New Password", "Please "+resUpdateUser.Email+" relogin using new password.")
+											isLoggedIn = false
+											currentUser = model.Users{}
+										}
+										isChangePassword = false
+										updateProfile = false
+										callClear()
+									} else {
+										Message("Failed", "New Password is not match", "Please try again")
+										callClear()
+									}
+								} else {
+									Message("Failed", "Old Password is not correct", "Please try again")
+									isChangePassword = false
+									callClear()
+								}
+							}
+						case 5:
+							callClear()
+							statusAccount := "Active"
+							if currentUser.Is_Active {
+								statusAccount = "Active"
+							} else {
+								statusAccount = "Not Active"
+							}
+
+							fmt.Println("\t--Status Account--")
+							fmt.Println("================")
+							fmt.Printf("Status: %s", statusAccount)
+							fmt.Println("\n================")
+							isDeactivateAcc := true
+							for isDeactivateAcc {
+								fmt.Println("\nAre you sure want to Deactivate Your Account? (Y/N)")
+								fmt.Scanln(&yesNo)
+								if yesNo == "Y" || yesNo == "y" {
+									currentUser.Is_Active = false
+									resUpdateUser, err := userControl.Edit(currentUser)
+									if err != nil {
+										ErrorMsg(showError, "Error on Deactivating Account", "Please try again.", err.Error())
+									}
+									Message("Success", "Deactivate Account Success", "Your Account "+resUpdateUser.Email+" Now Deactive.")
+									isDeactivateAcc = false
+									updateProfile = false
+									isLoggedIn = false
+									currentUser = model.Users{}
+									callClear()
+								} else if yesNo == "N" || yesNo == "n" {
+									isDeactivateAcc = false
+									updateProfile = false
+									callClear()
+								} else {
+									isDeactivateAcc = true
+								}
+							}
+						case 9:
+							Message("Kembali", "Ke Menu Sebelumnya...", "")
+							updateProfile = false
+						case 0:
+							Message("Kembali", "Ke Menu Sebelumnya...", "")
+							updateProfile = false
+							homepageMemberMenu = false
+						}
+					}
+				case 4:
+					callClear()
+					myLibraryMenu := true
+					for myLibraryMenu {
+						callClear()
+						fmt.Println("\t--My Library--")
+						fmt.Println("1. My Books")
+						fmt.Println("2. Borrow")
+
+						fmt.Println("===================")
+						fmt.Println("9. Back")
+						fmt.Println("0. Main Menu")
+						fmt.Print("Enter Your Input: ")
+						fmt.Scanln(&inputMenu)
+
+						switch inputMenu {
+						case 1:
+							callClear()
+							fmt.Println("\t--My Books--")
+							fmt.Println("1. Add Book")
+							fmt.Println("2. List My Book")
+
+							fmt.Println("===================")
 							fmt.Println("9. Back")
 							fmt.Println("0. Main Menu")
 							fmt.Print("Enter Your Input: ")
 							fmt.Scanln(&inputMenu)
 							switch inputMenu {
 							case 1:
-								fmt.Println("== Choose Number Edit Book Data ==")
-								fmt.Scanln(&inputBookNumber)
-
-								var targetedBook model.Books = result[inputBookNumber-1]
-
+								var newBook models.Books
 								callClear()
-								fmt.Println("List My Book Table")
-								fmt.Println("==================================")
-								fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status")
+								fmt.Println("\t--Add Book--")
+								fmt.Println("Input Title:")
+								fmt.Scanln(&newBook.Title)
+								fmt.Println("Input Author:")
+								fmt.Scanln(&newBook.Author)
 
-								var status string
-								if targetedBook.Is_Borrowed {
-									status = "Not Available"
-								} else {
-									status = "Available"
+								newBook.Is_Borrowed = false
+								newBook.Is_Deleted = false
+								newBook.IDUser = currentUser.ID
+
+								result, err := bookControl.Add(newBook)
+								if err != nil {
+									ErrorMsg(showError, "Add Book Failed", "Failed to Add Book. Please try again.", err.Error())
 								}
-								fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", 1, targetedBook.ID, targetedBook.Title, targetedBook.Author, status)
 
-								fmt.Println("\n==============================")
-								fmt.Println("1. Edit Title")
-								fmt.Println("2. Edit Author")
-								fmt.Println("3. Delete Book")
+								Message("Add Book Success", "Book "+result.Title+" Added.", "")
+							case 2:
+								listMyBookMenu := true
+								for listMyBookMenu {
+
+									callClear()
+									var inputBookNumber int
+
+									fmt.Println("\t--List My Book--")
+
+									result, err := bookControl.GetUserBooks(currentUser.ID)
+									if err != nil {
+										ErrorMsg(showError, "Failed Retrieve List Books", "Please try again.", err.Error())
+									}
+
+									fmt.Println("List My Book Table")
+									fmt.Println("==================================")
+									fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status")
+
+									if !reflect.ValueOf(result).IsZero() {
+										i := 1
+										var status string
+										for _, value := range result {
+											if value.Is_Borrowed {
+												status = "Not Available"
+											} else {
+												status = "Available"
+											}
+											fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", i, value.ID, value.Title, value.Author, status)
+											i++
+										}
+									} else {
+										fmt.Println("\n\t\\tt Book Title not Found")
+									}
+
+									fmt.Println("\n==============================")
+									fmt.Println("1. Choose Number Edit Book Data")
+									fmt.Println("9. Back")
+									fmt.Println("0. Main Menu")
+									fmt.Print("Enter Your Input: ")
+									fmt.Scanln(&inputMenu)
+									switch inputMenu {
+									case 1:
+										fmt.Println("== Choose Number Edit Book Data ==")
+										fmt.Scanln(&inputBookNumber)
+
+										isEditBookMenu := true
+
+										for isEditBookMenu {
+
+											result, _ := bookControl.GetUserBooks(currentUser.ID)
+											var targetedBook model.Books = result[inputBookNumber-1]
+
+											callClear()
+											fmt.Println("List My Book Table")
+											fmt.Println("==================================")
+											fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status")
+
+											var status string
+											if targetedBook.Is_Borrowed {
+												status = "Not Available"
+											} else {
+												status = "Available"
+											}
+											fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", 1, targetedBook.ID, targetedBook.Title, targetedBook.Author, status)
+
+											fmt.Println("\n==============================")
+											fmt.Println("1. Edit Title")
+											fmt.Println("2. Edit Author")
+											fmt.Println("3. Delete Book")
+											fmt.Println("9. Back")
+											fmt.Println("0. Main Menu")
+											fmt.Print("Enter Your Input: ")
+											fmt.Scanln(&inputMenu)
+											switch inputMenu {
+											case 1:
+												fmt.Println("\t--Edit Title--")
+												fmt.Println("Input Title :")
+												fmt.Scanln(&targetedBook.Title)
+												resUpdateBook, err := bookControl.Edit(targetedBook)
+												if err != nil {
+													ErrorMsg(showError, "Error on Updating Book", "Please try again.", err.Error())
+												} else {
+													Message("Success", "Edit Title Success", "Update to "+resUpdateBook.Title)
+												}
+
+											case 2:
+												fmt.Println("\t--Edit Author--")
+												fmt.Println("Input Author :")
+												fmt.Scanln(&targetedBook.Author)
+												resUpdateBook, err := bookControl.Edit(targetedBook)
+												if err != nil {
+													ErrorMsg(showError, "Error on Updating Book", "Please try again", err.Error())
+												} else {
+													Message("Success", "Edit Author Success", "Update to"+resUpdateBook.Author)
+												}
+											case 3:
+												fmt.Println("\t--Delete Book--")
+
+												isNotYesNo := true
+												for isNotYesNo {
+													fmt.Println("Are you sure to delete this? (y/n)")
+													fmt.Scanln(&yesNo)
+													if yesNo == "Y" || yesNo == "y" {
+														resultDelete, err := bookControl.Delete(targetedBook)
+														if err != nil {
+															ErrorMsg(showError, "Failed", "Deleting Book Failed", resultDelete)
+															fmt.Println("", err.Error())
+														} else {
+															Message("Success", "Deleting Book Success", "Delete Data"+resultDelete.Title)
+														}
+
+														isNotYesNo = false
+														callClear()
+													} else if yesNo == "N" || yesNo == "n" {
+														isNotYesNo = false
+														callClear()
+													} else {
+														isNotYesNo = true
+													}
+												}
+												isEditBookMenu = false
+											case 9:
+												isEditBookMenu = false
+												listMyBookMenu = false
+											case 0:
+												isEditBookMenu = false
+												listMyBookMenu = false
+
+											}
+											result, _ = bookControl.GetUserBooks(currentUser.ID)
+										}
+
+									case 9:
+									case 0:
+
+									}
+								}
+							}
+						case 2:
+							Borrow := true
+							for Borrow {
+								callClear()
+								fmt.Println("\t--Borrow--")
+								fmt.Println("1. Search Book")
+								fmt.Println("2. List of Books")
+								fmt.Println("3. List of Borrowed Books")
+								fmt.Println("===================")
 								fmt.Println("9. Back")
 								fmt.Println("0. Main Menu")
 								fmt.Print("Enter Your Input: ")
 								fmt.Scanln(&inputMenu)
+
 								switch inputMenu {
 								case 1:
-									fmt.Println("\t--Edit Title--")
-									fmt.Println("Input Title :")
-									fmt.Scanln(&targetedBook.Title)
-									resUpdateBook, err := bookControl.Edit(targetedBook)
-									if err != nil {
-										ErrorMsg(showError, "Error on Updating Book", "Please try again.", err.Error())
-									}
-									Message("Success", "Adding Book Success", resUpdateBook)
-
-									// kembali ke menu list my book
-									listMyBookMenu = false
 								case 2:
-									fmt.Println("\t--Edit Author--")
-									fmt.Println("Input Author :")
-									fmt.Scanln(&targetedBook.Author)
-									resUpdateBook, err := bookControl.Edit(targetedBook)
-									if err != nil {
-										ErrorMsg(showError, "Error on Updating Book", "Please try again", err.Error())
-									}
-									Message("Success", "Adding Book Success", resUpdateBook)
+									isListAvailableBook := true
+									for isListAvailableBook {
 
-									// kembali ke menu list my book
-									listMyBookMenu = false
-								case 3:
-									fmt.Println("\t--Delete Book--")
+										callClear()
 
-									isNotYesNo := true
-									for isNotYesNo {
-										fmt.Println("Are you sure to delete this? (y/n)")
-										fmt.Scanln(&yesNo)
-										if yesNo == "Y" || yesNo == "y" {
-											resultDelete, err := bookControl.Delete(targetedBook)
-											if err != nil {
-												ErrorMsg(showError, "Failed", "Deleting Book Failed", resultDelete)
-												fmt.Println("", err.Error())
+										fmt.Println("\t--List Available Book--")
+
+										resAvailBook, err := bookControl.GetAllAvailable()
+										if err != nil {
+											Message("Failed Get Avaialble Book", "Failed Retrieve Data", err.Error())
+										}
+
+										fmt.Println("List Available Book Table")
+										fmt.Println("==================================")
+										fmt.Printf("%4s | %5s | %15s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status", "Owner")
+
+										if resAvailBook != nil {
+											i := 1
+											var status string
+											for _, value := range resAvailBook {
+												if value.Is_Borrowed {
+													status = "Not Available"
+												} else {
+													status = "Available"
+												}
+												fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", i, value.ID, value.Title, value.Author, status)
+												i++
 											}
-											Message("Success", "Deleting Book Success", resultDelete)
-
-											isNotYesNo = false
-											listMyBookMenu = false
-											callClear()
-										} else if yesNo == "N" || yesNo == "n" {
-											isNotYesNo = false
-											listMyBookMenu = false
-											callClear()
 										} else {
-											isNotYesNo = true
+											fmt.Println("\n\t\\tt Book Title not Found")
+										}
+										fmt.Println("\n==============================")
+										fmt.Println("1. Choose Book Number to Borrow Book")
+										fmt.Println("9. Back")
+										fmt.Println("0. Main Menu")
+										fmt.Print("Enter Your Input: ")
+										fmt.Scanln(&inputMenu)
+										switch inputMenu {
+										case 1:
+											var inputBookNumber int
+											fmt.Println("== Choose Number to Borrow Book ==")
+											fmt.Scanln(&inputBookNumber)
+
+											callClear()
+											var targetedBook model.Books = resAvailBook[inputBookNumber-1]
+											ViewDetailBook(targetedBook)
+
+											fmt.Println("\nAre you sure want to borrow this book? (Y/N)")
+
+											var isNotYesNo bool = true
+
+											for isNotYesNo {
+												fmt.Scanln(&yesNo)
+												if yesNo == "Y" || yesNo == "y" {
+													isNotYesNo = false
+
+													ownerData, err := userControl.GetById(targetedBook.IDUser)
+													if err != nil {
+														fmt.Println("Failed Retrieve Book's Owner Data.")
+													}
+													var newLend model.Lends
+													newLend.Return_date = time.Time{}
+													newLend.Is_returned = false
+													newLend.Book_owner_id = ownerData.ID
+													newLend.Book_owner_email = ownerData.Email
+													newLend.Book_owner_name = ownerData.Name
+													newLend.Book_owner_address = ownerData.Address
+													newLend.Book_owner_phone = ownerData.Phone_number
+													newLend.Book_title = targetedBook.Title
+													newLend.Book_author = targetedBook.Author
+													newLend.IDUser = currentUser.ID
+													newLend.IDBook = targetedBook.ID
+
+													resBorrowBook, err := lendControl.AddLend(newLend)
+
+													if err != nil {
+														fmt.Println("Error on Borrow Book", err.Error())
+													} else {
+														// Update Status Is Borrowed di Buku
+														targetedBook.Is_Borrowed = true
+														resUpdateIsborrowed, err := bookControl.Edit(targetedBook)
+														if err != nil {
+															fmt.Println("Error on Update IsBorrowed Status", err.Error())
+														} else {
+															if resUpdateIsborrowed.ID != 0 {
+																Message("Success Borrow Book", "Success Add Borrowed Book : "+resBorrowBook.Book_title, "")
+															} else {
+																fmt.Println("Error on Update isBorrowedBook, no book updated", err.Error())
+															}
+
+														}
+													}
+													isNotYesNo = false
+
+												} else if yesNo == "N" || yesNo == "n" {
+													isNotYesNo = false
+													callClear()
+												} else {
+													isNotYesNo = true
+												}
+											}
+										case 9:
+											isListAvailableBook = false
+										case 0:
+
+										}
+									}
+								case 3:
+									listBorrowedMenu := true
+									for listBorrowedMenu {
+
+										callClear()
+										var inputBookNumber int
+
+										result, err := lendControl.GetUserBookBorrow(currentUser.ID)
+										if err != nil {
+											Message("Get Borrowed List Failed", "Failed to retieve Borrowed List", err.Error())
+										}
+
+										fmt.Println("List of My Borrowed Books")
+										fmt.Println("==================================")
+										fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Book Owner")
+
+										if result != nil {
+											i := 1
+											for _, value := range result {
+												fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", i, value.ID, value.Book_title, value.Book_author, value.Book_owner_name)
+												i++
+											}
+										} else {
+											fmt.Println("\n\t\\tt Book Title not Found")
+										}
+
+										fmt.Println("\n==============================")
+										fmt.Println("1. Choose the book to be returned")
+										fmt.Println("9. Back")
+										fmt.Println("0. Main Menu")
+										fmt.Print("Enter Your Input: ")
+										fmt.Scanln(&inputMenu)
+										switch inputMenu {
+										case 1:
+											// validasi input, kalau dia <= 0 panic error out of range
+											notValidInput := true
+											for notValidInput {
+												fmt.Println("== Choose Number To Be Returned ==")
+												fmt.Scanln(&inputBookNumber)
+
+												if inputBookNumber < len(result) {
+													Message("Input Not Valid", "Number input must in range.", "")
+												} else {
+													notValidInput = false
+												}
+											}
+
+											var targetedLend model.Lends = result[inputBookNumber-1]
+
+											callClear()
+											fmt.Println("List My Borrowed Books")
+											fmt.Println("==================================")
+											fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Book Owner")
+
+											fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", 1, targetedLend.ID, targetedLend.Book_title, targetedLend.Book_author, targetedLend.Book_owner_name)
+
+											fmt.Println("\n==============================")
+
+											isNotYesNo := true
+											for isNotYesNo {
+												fmt.Println("Are you sure to Return this book? (y/n)")
+												fmt.Scanln(&yesNo)
+												if yesNo == "Y" || yesNo == "y" {
+													targetedLend.Is_returned = true
+													resultReturn, err := lendControl.Model.ReturnBook(targetedLend)
+													if err != nil {
+														Message("Failed", "Returning Book Failed", resultReturn)
+														fmt.Println("", err.Error())
+													} else {
+														// Update Status Is Borrowed di Buku menjadi false = available
+														targetedBook, err := bookControl.GetById(resultReturn.IDBook)
+
+														if err != nil {
+															fmt.Println("Failed get book to update status")
+														} else {
+															targetedBook.Is_Borrowed = false
+															resUpdateIsborrowed, err := bookControl.Edit(targetedBook)
+															if err != nil {
+																fmt.Println("Error on Update IsBorrowed Status to Available", err.Error())
+															} else {
+																if resUpdateIsborrowed.ID > 0 {
+																	Message("Success Return Book", "Success Returning Book : "+resultReturn.Book_title, "")
+																} else {
+																	fmt.Println("Error on Update isBorrowedBook to Available, no book updated", err.Error())
+																}
+
+															}
+														}
+													}
+
+													isNotYesNo = false
+													Borrow = false
+													callClear()
+												} else if yesNo == "N" || yesNo == "n" {
+													isNotYesNo = false
+													Borrow = false
+													callClear()
+												} else {
+													isNotYesNo = true
+												}
+											}
+										case 9:
+											Message("Kembali", "Ke Menu Sebelumnya...", "")
+											listBorrowedMenu = false
+										case 0:
+											Message("Kembali", "Ke Menu Sebelumnya...", "")
+											listBorrowedMenu = false
+											homepageMemberMenu = false
 										}
 									}
 								case 9:
+									Message("Kembali", "Ke Menu Sebelumnya...", "")
+									Borrow = false
 								case 0:
+									Message("Kembali", "Ke Menu Sebelumnya...", "")
+									Borrow = false
+									homepageMemberMenu = false
 								}
-
-							case 9:
-							case 0:
-
 							}
+						case 9:
+							Message("Kembali", "Ke Menu Sebelumnya...", "")
+							myLibraryMenu = false
+						case 0:
+							Message("Kembali", "Ke Menu Sebelumnya...", "")
+							myLibraryMenu = false
+							homepageMemberMenu = false
 						}
 					}
-				case 2:
-				}
-			case 9:
-				var isNotYesNo bool = true
+				case 9:
+					var isNotYesNo bool = true
 
-				for isNotYesNo {
-					fmt.Println("Are you sure to Logout? (Y/N)")
-					fmt.Scanln(&yesNo)
-					if yesNo == "Y" || yesNo == "y" {
-						isNotYesNo = false
-						isLoggedIn = false
-						callClear()
-					} else if yesNo == "N" || yesNo == "n" {
-						isNotYesNo = false
-						callClear()
-					} else {
-						isNotYesNo = true
+					for isNotYesNo {
+						fmt.Println("Are you sure to Logout? (Y/N)")
+						fmt.Scanln(&yesNo)
+						if yesNo == "Y" || yesNo == "y" {
+							isNotYesNo = false
+							isLoggedIn = false
+							callClear()
+						} else if yesNo == "N" || yesNo == "n" {
+							isNotYesNo = false
+							callClear()
+						} else {
+							isNotYesNo = true
+						}
 					}
 				}
+
 			}
 		}
 	}
@@ -556,7 +853,7 @@ func Message(_title, _content, _detail interface{}) {
 	fmt.Println("=== ", _title, " ===")
 	fmt.Println(_content)
 	fmt.Println(_detail)
-	fmt.Println("Tekan Enter untuk melanjutkan.")
+	fmt.Println("Please Enter to continue...")
 	fmt.Scanln(&next)
 }
 
@@ -571,6 +868,21 @@ func ErrorMsg(_isShow bool, _title, _content, _detail interface{}) {
 		fmt.Println("=== ", _title, " ===")
 		fmt.Println(_content)
 	}
-	fmt.Println("\nTekan Enter untuk melanjutkan.")
+	fmt.Println("\nPlease Enter to continue...")
 	fmt.Scanln(&next)
+}
+
+func ViewDetailBook(_bookData model.Books) {
+
+	var bookStatus string
+	if _bookData.Is_Borrowed {
+		bookStatus = "Not Available"
+	} else {
+		bookStatus = "Available"
+	}
+
+	fmt.Println("======Book Detail======")
+	fmt.Println("Book Title : ", _bookData.Title)
+	fmt.Println("Book Author : ", _bookData.Author)
+	fmt.Println("Book Status : ", bookStatus)
 }

@@ -31,6 +31,16 @@ func (bm BooksModel) GetAll() ([]Books, error) {
 	}
 	return result, nil
 }
+func (bm BooksModel) GetAllAvailable() ([]Books, error) {
+	var result []Books
+	// err := bm.DB.Where(&Books{Is_Borrowed: false}).Find(&result).Error
+	err := bm.DB.Not("is_borrowed = ?", 1).Find(&result).Error
+	if err != nil {
+		fmt.Println("Error on Query", err.Error())
+		return nil, err
+	}
+	return result, nil
+}
 
 func (bm BooksModel) GetWhere(_title string) ([]Books, error) {
 	var result []Books
@@ -44,7 +54,7 @@ func (bm BooksModel) GetWhere(_title string) ([]Books, error) {
 
 func (bm BooksModel) GetUserBooks(_IDUser uint) ([]Books, error) {
 	var result []Books
-	err := bm.DB.Where(&Books{IDUser: _IDUser}).Find(&result).Error
+	err := bm.DB.Where("id_user = ?", _IDUser).Find(&result).Error
 	if err != nil {
 		fmt.Println("Error on Query", err.Error())
 		return nil, err
@@ -52,12 +62,12 @@ func (bm BooksModel) GetUserBooks(_IDUser uint) ([]Books, error) {
 	return result, nil
 }
 
-func (bm BooksModel) GetBorrowed() ([]Books, error) {
-	var result []Books
-	err := bm.DB.Where(&Books{}).Find(&result).Error
+func (bm BooksModel) GetById(_IDBook uint) (Books, error) {
+	var result Books
+	err := bm.DB.First(&result, _IDBook).Error
 	if err != nil {
 		fmt.Println("Error on Query", err.Error())
-		return nil, err
+		return Books{}, err
 	}
 	return result, nil
 }
