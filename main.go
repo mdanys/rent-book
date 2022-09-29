@@ -472,8 +472,18 @@ func main() {
 									fmt.Scanln(&inputMenu)
 									switch inputMenu {
 									case 1:
-										fmt.Println("== Choose Number Edit Book Data ==")
-										fmt.Scanln(&inputBookNumber)
+										// validasi input, kalau dia <= 0 panic error out of range
+										notValidInput := true
+										for notValidInput {
+											fmt.Println("== Choose Number Edit Book Data ==")
+											fmt.Scanln(&inputBookNumber)
+
+											if inputBookNumber < len(result) {
+												Message("Input Not Valid", "Number input must in range.", "")
+											} else {
+												notValidInput = false
+											}
+										}
 
 										isEditBookMenu := true
 
