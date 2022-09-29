@@ -78,11 +78,10 @@ func main() {
 			switch inputMenu {
 			case 1:
 				callClear()
-				fmt.Println("\t--Find Books--")
+				fmt.Println("\t--Search Books--")
 				fmt.Println("1. Find Books by Title")
 				fmt.Println("2. Find Books by Author")
 				fmt.Println("9. Back")
-				fmt.Println("0. Main Menu")
 				fmt.Print("Enter Your Input: ")
 				fmt.Scanln(&inputMenu)
 				switch inputMenu {
@@ -92,30 +91,61 @@ func main() {
 					fmt.Println("Please enter book's title :")
 					fmt.Scanln(&currentBook.Title)
 
-					result, err := bookControl.GetWhere(currentBook.Title)
+					result, err := bookControl.GetWhere(currentBook.Title, "title")
 					if err != nil {
 						ErrorMsg(showError, "Searching Book Failed", "Book not found or failed to retrieve data.", err.Error())
 					}
+					var title string = fmt.Sprintf("%4s | %s | %s | %25s | %5s |\n", "No", "Book Id", fmt.Sprintf("%*s", 25, "Title"), "Author", "ID Owner")
+					rowLen := len(title)
 
-					fmt.Println("Tabel Pencarian Buku")
-					fmt.Println("==================================")
-					fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status")
-
+					fmt.Println("== List of Book ==")
+					fmt.Print(title)
+					for i := 0; i < rowLen; i++ {
+						fmt.Print("=")
+					}
+					fmt.Print("\n")
 					if result != nil {
-						//i := 1
-						// for _, value := range result {
-						// 	//fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", i, value.ID, value.Title, value.Author, value."Status")
-						// 	i++
-						// }
+						i := 1
+						for _, value := range result {
+							fmt.Printf("%4d | %s | %25s | %25s | %s |\n", i, fmt.Sprintf("%*d", 7, value.ID), value.Title, value.Author, fmt.Sprintf("%*d", 8, value.IDUser))
+							i++
+						}
 					} else {
 						fmt.Println("\n\t\\tt Book Title not Found")
 					}
-
-					fmt.Println("9. Back")
-					fmt.Println("0. Main Menu")
-					fmt.Print("Enter Your Input: ")
-					fmt.Scanln(&inputMenu)
+					Message("Done", "", "")
 				case 2:
+					callClear()
+					fmt.Println("\t--Find Books by Author--")
+					fmt.Println("Please enter book's author :")
+					fmt.Scanln(&currentBook.Author)
+
+					result, err := bookControl.GetWhere(currentBook.Author, "author")
+					if err != nil {
+						ErrorMsg(showError, "Searching Book Failed", "Book not found or failed to retrieve data.", err.Error())
+					}
+					var author string = fmt.Sprintf("%4s | %s | %s | %25s | %5s |\n", "No", "Book Id", fmt.Sprintf("%*s", 25, "Title"), "Author", "ID Owner")
+					rowLen := len(author)
+
+					fmt.Println("== List of Book ==")
+					fmt.Print(author)
+					for i := 0; i < rowLen; i++ {
+						fmt.Print("=")
+					}
+					fmt.Print("\n")
+					if result != nil {
+						i := 1
+						for _, value := range result {
+							fmt.Printf("%4d | %s | %25s | %25s | %s |\n", i, fmt.Sprintf("%*d", 7, value.ID), value.Title, value.Author, fmt.Sprintf("%*d", 8, value.IDUser))
+							i++
+						}
+					} else {
+						fmt.Println("\n\t\\tt Book Title not Found")
+					}
+					Message("Done", "", "")
+				case 9:
+					Message("Kembali", "Ke Menu Sebelumnya...", "")
+					isRunning = false
 				}
 			case 2:
 				callClear()
@@ -137,7 +167,6 @@ func main() {
 					for _, value := range result {
 						fmt.Printf("%4d | %s | %25s | %25s | %s |\n", i, fmt.Sprintf("%*d", 7, value.ID), value.Title, value.Author, fmt.Sprintf("%*d", 8, value.IDUser))
 						i++
-
 					}
 				} else {
 					fmt.Println("\n\t\\tt Book Title not Found")
@@ -224,17 +253,206 @@ func main() {
 				fmt.Println("\t--HOMEPAGE MEMBER--")
 				fmt.Println("\tWelcome,", currentUser.Name)
 				fmt.Println("1. Search Books")
-				fmt.Println("2. List of Books")
+				fmt.Println("2. List of Available Books")
 				fmt.Println("3. Update Profile")
 				fmt.Println("4. My Library")
 				fmt.Println("===================")
 				fmt.Println("9. Logout")
 				fmt.Print("Enter Your Input: ")
 				fmt.Scanln(&inputMenu)
-
 				switch inputMenu {
 				case 1:
+					callClear()
+					fmt.Println("\t--Search Books--")
+					fmt.Println("1. Find Books by Title")
+					fmt.Println("2. Find Books by Author")
+					fmt.Println("9. Back")
+					fmt.Print("Enter Your Input: ")
+					fmt.Scanln(&inputMenu)
+					switch inputMenu {
+					case 1:
+						callClear()
+						fmt.Println("\t--Find Books by Title--")
+						fmt.Println("Please enter book's title :")
+						fmt.Scanln(&currentBook.Title)
+
+						result, err := bookControl.GetWhere(currentBook.Title, "title")
+						if err != nil {
+							ErrorMsg(showError, "Searching Book Failed", "Book not found or failed to retrieve data.", err.Error())
+						}
+						var title string = fmt.Sprintf("%4s | %s | %s | %25s | %5s |\n", "No", "Book Id", fmt.Sprintf("%*s", 25, "Title"), "Author", "ID Owner")
+						rowLen := len(title)
+
+						fmt.Println("== List of Book ==")
+						fmt.Print(title)
+						for i := 0; i < rowLen; i++ {
+							fmt.Print("=")
+						}
+						fmt.Print("\n")
+						if result != nil {
+							i := 1
+							for _, value := range result {
+								fmt.Printf("%4d | %s | %25s | %25s | %s |\n", i, fmt.Sprintf("%*d", 7, value.ID), value.Title, value.Author, fmt.Sprintf("%*d", 8, value.IDUser))
+								i++
+							}
+						} else {
+							fmt.Println("\n\t\\tt Book Title not Found")
+						}
+						Message("Done", "", "")
+					case 2:
+						callClear()
+						fmt.Println("\t--Find Books by Author--")
+						fmt.Println("Please enter book's author :")
+						fmt.Scanln(&currentBook.Author)
+
+						result, err := bookControl.GetWhere(currentBook.Author, "author")
+						if err != nil {
+							ErrorMsg(showError, "Searching Book Failed", "Book not found or failed to retrieve data.", err.Error())
+						}
+						var author string = fmt.Sprintf("%4s | %s | %s | %25s | %5s |\n", "No", "Book Id", fmt.Sprintf("%*s", 25, "Title"), "Author", "ID Owner")
+						rowLen := len(author)
+
+						fmt.Println("== List of Book ==")
+						fmt.Print(author)
+						for i := 0; i < rowLen; i++ {
+							fmt.Print("=")
+						}
+						fmt.Print("\n")
+						if result != nil {
+							i := 1
+							for _, value := range result {
+								fmt.Printf("%4d | %s | %25s | %25s | %s |\n", i, fmt.Sprintf("%*d", 7, value.ID), value.Title, value.Author, fmt.Sprintf("%*d", 8, value.IDUser))
+								i++
+							}
+						} else {
+							fmt.Println("\n\t\\tt Book Title not Found")
+						}
+						Message("Done", "", "")
+					case 9:
+						Message("Kembali", "Ke Menu Sebelumnya...", "")
+						isRunning = false
+					}
 				case 2:
+					isListAvailableBook := true
+					for isListAvailableBook {
+
+						callClear()
+
+						fmt.Println("\t--List Available Book--")
+
+						resAvailBook, err := bookControl.GetAllAvailable()
+						if err != nil {
+							Message("Failed Get Available Book", "Failed Retrieve Data", err.Error())
+						}
+
+						fmt.Println("List Available Book Table")
+						fmt.Println("==================================")
+						fmt.Printf("%4s | %5s | %15s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status", "Owner")
+
+						if resAvailBook != nil {
+							i := 1
+							var status string
+							for _, value := range resAvailBook {
+								if value.Is_Borrowed {
+									status = "Not Available"
+								} else {
+									status = "Available"
+								}
+								fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", i, value.ID, value.Title, value.Author, status)
+								i++
+							}
+						} else {
+							fmt.Println("\n\t\\tt Book Title not Found")
+						}
+						fmt.Println("\n==============================")
+						fmt.Println("1. Choose Book Number to Borrow Book")
+						fmt.Println("9. Back")
+						fmt.Println("0. Main Menu")
+						fmt.Print("Enter Your Input: ")
+						fmt.Scanln(&inputMenu)
+						switch inputMenu {
+						case 1:
+							var inputBookNumber int
+							// validasi input, kalau dia <= 0 panic error out of range
+							notValidInput := true
+							for notValidInput {
+								fmt.Println("== Choose Number to Borrow Book ==")
+								fmt.Scanln(&inputBookNumber)
+								fmt.Println("Len data resavaild", len(resAvailBook))
+								if inputBookNumber > len(resAvailBook) || inputBookNumber < 1 {
+									Message("Input Not Valid", "Number input must in range.", "")
+								} else {
+									notValidInput = false
+								}
+							}
+
+							callClear()
+							var targetedBook model.Books = resAvailBook[inputBookNumber-1]
+							ViewDetailBook(targetedBook)
+
+							fmt.Println("\nAre you sure want to borrow this book? (Y/N)")
+
+							var isNotYesNo bool = true
+
+							for isNotYesNo {
+								fmt.Scanln(&yesNo)
+								if yesNo == "Y" || yesNo == "y" {
+									isNotYesNo = false
+
+									ownerData, err := userControl.GetById(targetedBook.IDUser)
+									if err != nil {
+										fmt.Println("Failed Retrieve Book's Owner Data.")
+									}
+									var newLend model.Lends
+									newLend.Return_date = time.Time{}
+									newLend.Is_returned = false
+									newLend.Book_owner_id = ownerData.ID
+									newLend.Book_owner_email = ownerData.Email
+									newLend.Book_owner_name = ownerData.Name
+									newLend.Book_owner_address = ownerData.Address
+									newLend.Book_owner_phone = ownerData.Phone_number
+									newLend.Book_title = targetedBook.Title
+									newLend.Book_author = targetedBook.Author
+									newLend.IDUser = currentUser.ID
+									newLend.IDBook = targetedBook.ID
+
+									resBorrowBook, err := lendControl.AddLend(newLend)
+
+									if err != nil {
+										fmt.Println("Error on Borrow Book", err.Error())
+									} else {
+										// Update Status Is Borrowed di Buku
+										targetedBook.Is_Borrowed = true
+										resUpdateIsborrowed, err := bookControl.Edit(targetedBook)
+										if err != nil {
+											fmt.Println("Error on Update IsBorrowed Status", err.Error())
+										} else {
+											if resUpdateIsborrowed.ID != 0 {
+												Message("Success Borrow Book", "Success Add Borrowed Book : "+resBorrowBook.Book_title, "")
+											} else {
+												fmt.Println("Error on Update isBorrowedBook, no book updated", err.Error())
+											}
+
+										}
+									}
+									isNotYesNo = false
+
+								} else if yesNo == "N" || yesNo == "n" {
+									isNotYesNo = false
+									callClear()
+								} else {
+									isNotYesNo = true
+								}
+							}
+						case 9:
+							Message("Kembali", "Ke Menu Sebelumnya...", "")
+							isListAvailableBook = false
+						case 0:
+							Message("Kembali", "Ke Menu...", "")
+							isListAvailableBook = false
+							homepageMemberMenu = false
+						}
+					}
 				case 3:
 					updateProfile := true
 					for updateProfile {
@@ -594,7 +812,7 @@ func main() {
 								callClear()
 								fmt.Println("\t--Borrow--")
 								fmt.Println("1. Search Book")
-								fmt.Println("2. List of Books")
+								fmt.Println("2. List of Available Books")
 								fmt.Println("3. List of Borrowed Books")
 								fmt.Println("===================")
 								fmt.Println("9. Back")

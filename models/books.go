@@ -42,9 +42,9 @@ func (bm BooksModel) GetAllAvailable() ([]Books, error) {
 	return result, nil
 }
 
-func (bm BooksModel) GetWhere(_title string) ([]Books, error) {
+func (bm BooksModel) GetWhere(_search, _column string) ([]Books, error) {
 	var result []Books
-	err := bm.DB.Where(&Books{Title: _title}).Find(&result).Error
+	err := bm.DB.Where(_column+" LIKE ?", "%"+_search+"%").Find(&result).Error
 	if err != nil {
 		fmt.Println("Error on Query", err.Error())
 		return nil, err
