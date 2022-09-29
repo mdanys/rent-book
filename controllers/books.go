@@ -28,8 +28,8 @@ func (bc BooksControl) GetAllAvailable() ([]model.Books, error) {
 	return result, nil
 }
 
-func (bc BooksControl) GetWhere(_title string) ([]model.Books, error) {
-	result, err := bc.Model.GetWhere(_title)
+func (bc BooksControl) GetWhere(_search, _column string) ([]model.Books, error) {
+	result, err := bc.Model.GetWhere(_search, _column)
 	if err != nil {
 		fmt.Println("Error on GetWhere", err.Error())
 		return nil, err
