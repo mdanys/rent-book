@@ -367,6 +367,7 @@ func main() {
 				case 2:
 					Borrow := true
 					for Borrow {
+						callClear()
 						fmt.Println("\t--Borrow--")
 						fmt.Println("1. Search Book")
 						fmt.Println("2. List of Books")
@@ -387,7 +388,7 @@ func main() {
 
 								fmt.Println("\t--List Available Book--")
 
-								result, err := bookControl.GetAll()
+								resAvailBook, err := bookControl.GetAllAvailable()
 								if err != nil {
 									Message("Failed Get Avaialble Book", "Failed Retrieve Data", err.Error())
 								}
@@ -396,10 +397,10 @@ func main() {
 								fmt.Println("==================================")
 								fmt.Printf("%4s | %5s | %15s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status", "Owner")
 
-								if result != nil {
+								if resAvailBook != nil {
 									i := 1
 									var status string
-									for _, value := range result {
+									for _, value := range resAvailBook {
 										if value.Is_Borrowed {
 											status = "Not Available"
 										} else {
@@ -423,10 +424,11 @@ func main() {
 									fmt.Println("== Choose Number to Borrow Book ==")
 									fmt.Scanln(&inputBookNumber)
 
-									var targetedBook model.Books = result[inputBookNumber-1]
-
-									fmt.Println("Are you sure want to borrow this book? (Y/N)")
+									callClear()
+									var targetedBook model.Books = resAvailBook[inputBookNumber-1]
 									ViewDetailBook(targetedBook)
+
+									fmt.Println("\nAre you sure want to borrow this book? (Y/N)")
 
 									var isNotYesNo bool = true
 
@@ -450,14 +452,27 @@ func main() {
 											newLend.Book_title = targetedBook.Title
 											newLend.Book_author = targetedBook.Author
 											newLend.IDUser = currentUser.ID
-											newLend.IDBook = currentBook.ID
+											newLend.IDBook = targetedBook.ID
 
 											resBorrowBook, err := lendControl.AddLend(newLend)
 
 											if err != nil {
 												fmt.Println("Error on Borrow Book", err.Error())
+											} else {
+												// Update Status Is Borrowed di Buku
+												targetedBook.Is_Borrowed = true
+												resUpdateIsborrowed, err := bookControl.Edit(targetedBook)
+												if err != nil {
+													fmt.Println("Error on Update IsBorrowed Status", err.Error())
+												} else {
+													if resUpdateIsborrowed.ID != 0 {
+														Message("Success Borrow Book", "Success Add Borrowed Book : "+resBorrowBook.Book_title, "")
+													} else {
+														fmt.Println("Error on Update isBorrowedBook, no book updated", err.Error())
+													}
+
+												}
 											}
-											Message("Success Borrow Book", "Success Add Borrowed Book : "+resBorrowBook.Book_title, "")
 											isNotYesNo = false
 
 										} else if yesNo == "N" || yesNo == "n" {
@@ -523,10 +538,31 @@ func main() {
 									fmt.Println("Are you sure to Return this book? (y/n)")
 									fmt.Scanln(&yesNo)
 									if yesNo == "Y" || yesNo == "y" {
+										targetedLend.Is_returned = true
 										resultReturn, err := lendControl.Model.ReturnBook(targetedLend)
 										if err != nil {
 											Message("Failed", "Returning Book Failed", resultReturn)
 											fmt.Println("", err.Error())
+										} else {
+											// Update Status Is Borrowed di Buku menjadi false = available
+											targetedBook, err := bookControl.GetById(resultReturn.IDBook)
+
+											if err != nil {
+												fmt.Println("Failed get book to update status")
+											} else {
+												targetedBook.Is_Borrowed = false
+												resUpdateIsborrowed, err := bookControl.Edit(targetedBook)
+												if err != nil {
+													fmt.Println("Error on Update IsBorrowed Status to Available", err.Error())
+												} else {
+													if resUpdateIsborrowed.ID > 0 {
+														Message("Success Return Book", "Success Returning Book : "+resultReturn.Book_title, "")
+													} else {
+														fmt.Println("Error on Update isBorrowedBook to Available, no book updated", err.Error())
+													}
+
+												}
+											}
 										}
 										Message("Success", "Returning Book Success", resultReturn)
 
@@ -596,7 +632,6 @@ func ViewDetailBook(_bookData model.Books) {
 		bookStatus = "Available"
 	}
 
-	fmt.Println("========================")
 	fmt.Println("======Book Detail======")
 	fmt.Println("Book Title : ", _bookData.Title)
 	fmt.Println("Book Author : ", _bookData.Author)

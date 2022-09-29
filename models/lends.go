@@ -29,7 +29,7 @@ type LendsModel struct {
 // Fungsi menampilkan list buku yang user pinjam
 func (lm LendsModel) GetUserBookBorrow(_IDUser uint) ([]Lends, error) {
 	var result []Lends
-	err := lm.DB.Where(&Lends{IDUser: _IDUser, Is_returned: false}).Find(&result).Error
+	err := lm.DB.Where("is_returned = ? AND id_user = ?", 0, _IDUser).Find(&result).Error
 	if err != nil {
 		fmt.Println("Error on Query", err.Error())
 		return nil, err
