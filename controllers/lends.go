@@ -27,3 +27,12 @@ func (lc LendsControl) AddLend(_newLend models.Lends) (models.Lends, error) {
 	}
 	return result, nil
 }
+
+func (lc LendsControl) ReturnBook(_newLend models.Lends) (models.Lends, error) {
+	result, err := lc.Model.ReturnBook(_newLend)
+	if err != nil {
+		lc.Util.ErrorMsg("Error GetUserBookBorrow", "", err.Error())
+		return models.Lends{}, err
+	}
+	return result, nil
+}
