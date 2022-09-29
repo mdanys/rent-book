@@ -95,7 +95,7 @@ func main() {
 					if err != nil {
 						ErrorMsg(showError, "Searching Book Failed", "Book not found or failed to retrieve data.", err.Error())
 					}
-					var title string = fmt.Sprintf("%4s | %s | %s | %25s | %5s |\n", "No", "Book Id", fmt.Sprintf("%*s", 25, "Title"), "Author", "ID Owner")
+					var title string = fmt.Sprintf("%4s | %s | %s | %25s | %13s |\n", "No", "Book Id", fmt.Sprintf("%*s", 25, "Title"), "Author", "Status")
 					rowLen := len(title)
 
 					fmt.Println("== List of Book ==")
@@ -107,8 +107,12 @@ func main() {
 					if result != nil {
 						i := 1
 						for _, value := range result {
-							fmt.Printf("%4d | %s | %25s | %25s | %s |\n", i, fmt.Sprintf("%*d", 7, value.ID), value.Title, value.Author, fmt.Sprintf("%*d", 8, value.IDUser))
-							i++
+							if value.IDUser != currentUser.ID {
+								if !value.Is_Borrowed {
+									fmt.Printf("%4d | %s | %25s | %25s | %s |\n", i, fmt.Sprintf("%*d", 7, value.ID), value.Title, value.Author, fmt.Sprintf("%*s", 13, BorrowedStatus(value.Is_Borrowed)))
+									i++
+								}
+							}
 						}
 					} else {
 						fmt.Println("\n\t\\tt Book Title not Found")
@@ -124,7 +128,7 @@ func main() {
 					if err != nil {
 						ErrorMsg(showError, "Searching Book Failed", "Book not found or failed to retrieve data.", err.Error())
 					}
-					var author string = fmt.Sprintf("%4s | %s | %s | %25s | %5s |\n", "No", "Book Id", fmt.Sprintf("%*s", 25, "Title"), "Author", "ID Owner")
+					var author string = fmt.Sprintf("%4s | %s | %s | %25s | %13s |\n", "No", "Book Id", fmt.Sprintf("%*s", 25, "Title"), "Author", "Status")
 					rowLen := len(author)
 
 					fmt.Println("== List of Book ==")
@@ -136,8 +140,12 @@ func main() {
 					if result != nil {
 						i := 1
 						for _, value := range result {
-							fmt.Printf("%4d | %s | %25s | %25s | %s |\n", i, fmt.Sprintf("%*d", 7, value.ID), value.Title, value.Author, fmt.Sprintf("%*d", 8, value.IDUser))
-							i++
+							if value.IDUser != currentUser.ID {
+								if !value.Is_Borrowed {
+									fmt.Printf("%4d | %s | %25s | %25s | %s |\n", i, fmt.Sprintf("%*d", 7, value.ID), value.Title, value.Author, fmt.Sprintf("%*s", 13, BorrowedStatus(value.Is_Borrowed)))
+									i++
+								}
+							}
 						}
 					} else {
 						fmt.Println("\n\t\\tt Book Title not Found")
@@ -271,63 +279,263 @@ func main() {
 					fmt.Scanln(&inputMenu)
 					switch inputMenu {
 					case 1:
-						callClear()
-						fmt.Println("\t--Find Books by Title--")
-						fmt.Println("Please enter book's title :")
-						fmt.Scanln(&currentBook.Title)
+						isFindTitle := true
 
-						result, err := bookControl.GetWhere(currentBook.Title, "title")
-						if err != nil {
-							ErrorMsg(showError, "Searching Book Failed", "Book not found or failed to retrieve data.", err.Error())
-						}
-						var title string = fmt.Sprintf("%4s | %s | %s | %25s | %5s |\n", "No", "Book Id", fmt.Sprintf("%*s", 25, "Title"), "Author", "ID Owner")
-						rowLen := len(title)
+						for isFindTitle {
+							callClear()
+							fmt.Println("\t--Find Books by Title--")
+							fmt.Println("Please enter book's title :")
+							fmt.Scanln(&currentBook.Title)
 
-						fmt.Println("== List of Book ==")
-						fmt.Print(title)
-						for i := 0; i < rowLen; i++ {
-							fmt.Print("=")
-						}
-						fmt.Print("\n")
-						if result != nil {
-							i := 1
-							for _, value := range result {
-								fmt.Printf("%4d | %s | %25s | %25s | %s |\n", i, fmt.Sprintf("%*d", 7, value.ID), value.Title, value.Author, fmt.Sprintf("%*d", 8, value.IDUser))
-								i++
+							result, err := bookControl.GetWhere(currentBook.Title, "title")
+							if err != nil {
+								ErrorMsg(showError, "Searching Book Failed", "Book not found or failed to retrieve data.", err.Error())
 							}
-						} else {
-							fmt.Println("\n\t\\tt Book Title not Found")
+							var title string = fmt.Sprintf("%4s | %s | %s | %25s | %13s |\n", "No", "Book Id", fmt.Sprintf("%*s", 25, "Title"), "Author", "Status")
+							rowLen := len(title)
+
+							fmt.Println("== List of Book ==")
+							fmt.Print(title)
+							for i := 0; i < rowLen; i++ {
+								fmt.Print("=")
+							}
+							fmt.Print("\n")
+							if result != nil {
+								i := 1
+								for _, value := range result {
+									if value.IDUser != currentUser.ID {
+										if !value.Is_Borrowed {
+											fmt.Printf("%4d | %s | %25s | %25s | %s |\n", i, fmt.Sprintf("%*d", 7, value.ID), value.Title, value.Author, fmt.Sprintf("%*s", 13, BorrowedStatus(value.Is_Borrowed)))
+											i++
+										}
+									}
+								}
+							} else {
+								fmt.Println("\n\t\\tt Book Title not Found")
+							}
+
+							fmt.Println("\n==============================")
+							fmt.Println("1. Choose Book Number to Borrow Book")
+							fmt.Println("9. Back")
+							fmt.Println("0. Main Menu")
+							fmt.Print("Enter Your Input: ")
+							fmt.Scanln(&inputMenu)
+							switch inputMenu {
+							case 1:
+								var inputBookNumber int
+								// validasi input, kalau dia <= 0 panic error out of range
+								notValidInput := true
+								for notValidInput {
+									fmt.Println("== Choose Number to Borrow Book ==")
+									fmt.Scanln(&inputBookNumber)
+									fmt.Println("Len data resavaild", len(result))
+									if inputBookNumber > len(result) || inputBookNumber < 1 {
+										Message("Input Not Valid", "Number input must in range.", "")
+									} else {
+										notValidInput = false
+									}
+									isFindTitle = false
+								}
+
+								callClear()
+								var targetedBook model.Books = result[inputBookNumber-1]
+								ViewDetailBook(targetedBook)
+								if targetedBook.ID == currentBook.IDUser || targetedBook.Is_Borrowed {
+									Message("Borrow Failed", "You can't borrow your own book Or Book is not Available.", "")
+								} else {
+									fmt.Println("\nAre you sure want to borrow this book? (Y/N)")
+
+									var isNotYesNo bool = true
+
+									for isNotYesNo {
+										fmt.Scanln(&yesNo)
+										if yesNo == "Y" || yesNo == "y" {
+											isNotYesNo = false
+
+											ownerData, err := userControl.GetById(targetedBook.IDUser)
+											if err != nil {
+												fmt.Println("Failed Retrieve Book's Owner Data.")
+											}
+											var newLend model.Lends
+											newLend.Return_date = time.Time{}
+											newLend.Is_returned = false
+											newLend.Book_owner_id = ownerData.ID
+											newLend.Book_owner_email = ownerData.Email
+											newLend.Book_owner_name = ownerData.Name
+											newLend.Book_owner_address = ownerData.Address
+											newLend.Book_owner_phone = ownerData.Phone_number
+											newLend.Book_title = targetedBook.Title
+											newLend.Book_author = targetedBook.Author
+											newLend.IDUser = currentUser.ID
+											newLend.IDBook = targetedBook.ID
+
+											resBorrowBook, err := lendControl.AddLend(newLend)
+
+											if err != nil {
+												fmt.Println("Error on Borrow Book", err.Error())
+											} else {
+												// Update Status Is Borrowed di Buku
+												targetedBook.Is_Borrowed = true
+												resUpdateIsborrowed, err := bookControl.Edit(targetedBook)
+												if err != nil {
+													fmt.Println("Error on Update IsBorrowed Status", err.Error())
+												} else {
+													if resUpdateIsborrowed.ID != 0 {
+														Message("Success Borrow Book", "Success Add Borrowed Book : "+resBorrowBook.Book_title, "")
+													} else {
+														fmt.Println("Error on Update isBorrowedBook, no book updated", err.Error())
+													}
+												}
+											}
+											isNotYesNo = false
+											isFindTitle = false
+
+										} else if yesNo == "N" || yesNo == "n" {
+											isNotYesNo = false
+											isFindTitle = false
+											callClear()
+										} else {
+											isNotYesNo = true
+										}
+									}
+								}
+							case 9:
+								Message("Kembali", "Ke Menu Sebelumnya...", "")
+								isFindTitle = false
+							case 0:
+								Message("Kembali", "Ke Menu...", "")
+								isFindTitle = false
+								homepageMemberMenu = false
+							}
 						}
-						Message("Done", "", "")
 					case 2:
-						callClear()
-						fmt.Println("\t--Find Books by Author--")
-						fmt.Println("Please enter book's author :")
-						fmt.Scanln(&currentBook.Author)
+						isFindAuthor := true
+						for isFindAuthor {
+							callClear()
+							fmt.Println("\t--Find Books by Author--")
+							fmt.Println("Please enter book's author :")
+							fmt.Scanln(&currentBook.Author)
 
-						result, err := bookControl.GetWhere(currentBook.Author, "author")
-						if err != nil {
-							ErrorMsg(showError, "Searching Book Failed", "Book not found or failed to retrieve data.", err.Error())
-						}
-						var author string = fmt.Sprintf("%4s | %s | %s | %25s | %5s |\n", "No", "Book Id", fmt.Sprintf("%*s", 25, "Title"), "Author", "ID Owner")
-						rowLen := len(author)
-
-						fmt.Println("== List of Book ==")
-						fmt.Print(author)
-						for i := 0; i < rowLen; i++ {
-							fmt.Print("=")
-						}
-						fmt.Print("\n")
-						if result != nil {
-							i := 1
-							for _, value := range result {
-								fmt.Printf("%4d | %s | %25s | %25s | %s |\n", i, fmt.Sprintf("%*d", 7, value.ID), value.Title, value.Author, fmt.Sprintf("%*d", 8, value.IDUser))
-								i++
+							result, err := bookControl.GetWhere(currentBook.Author, "author")
+							if err != nil {
+								ErrorMsg(showError, "Searching Book Failed", "Book not found or failed to retrieve data.", err.Error())
 							}
-						} else {
-							fmt.Println("\n\t\\tt Book Title not Found")
+							var author string = fmt.Sprintf("%4s | %s | %s | %25s | %13s |\n", "No", "Book Id", fmt.Sprintf("%*s", 25, "Title"), "Author", "Status")
+							rowLen := len(author)
+
+							fmt.Println("== List of Book ==")
+							fmt.Print(author)
+							for i := 0; i < rowLen; i++ {
+								fmt.Print("=")
+							}
+							fmt.Print("\n")
+							if result != nil {
+								i := 1
+								for _, value := range result {
+									if value.IDUser != currentUser.ID {
+										if !value.Is_Borrowed {
+											fmt.Printf("%4d | %s | %25s | %25s | %s |\n", i, fmt.Sprintf("%*d", 7, value.ID), value.Title, value.Author, fmt.Sprintf("%*s", 13, BorrowedStatus(value.Is_Borrowed)))
+											i++
+										}
+									}
+								}
+							} else {
+								fmt.Println("\n\t\\tt Book Title not Found")
+							}
+							fmt.Println("\n==============================")
+							fmt.Println("1. Choose Book Number to Borrow Book")
+							fmt.Println("9. Back")
+							fmt.Println("0. Main Menu")
+							fmt.Print("Enter Your Input: ")
+							fmt.Scanln(&inputMenu)
+							switch inputMenu {
+							case 1:
+								var inputBookNumber int
+								// validasi input, kalau dia <= 0 panic error out of range
+								notValidInput := true
+								for notValidInput {
+									fmt.Println("== Choose Number to Borrow Book ==")
+									fmt.Scanln(&inputBookNumber)
+									fmt.Println("Len data resavaild", len(result))
+									if inputBookNumber > len(result) || inputBookNumber < 1 {
+										Message("Input Not Valid", "Number input must in range.", "")
+									} else {
+										notValidInput = false
+									}
+									isFindAuthor = false
+								}
+
+								callClear()
+								var targetedBook model.Books = result[inputBookNumber-1]
+								ViewDetailBook(targetedBook)
+								if targetedBook.ID == currentBook.IDUser || targetedBook.Is_Borrowed {
+									Message("Borrow Failed", "You can't borrow your own book Or Book is not Available.", "")
+								} else {
+									fmt.Println("\nAre you sure want to borrow this book? (Y/N)")
+
+									var isNotYesNo bool = true
+
+									for isNotYesNo {
+										fmt.Scanln(&yesNo)
+										if yesNo == "Y" || yesNo == "y" {
+											isNotYesNo = false
+
+											ownerData, err := userControl.GetById(targetedBook.IDUser)
+											if err != nil {
+												fmt.Println("Failed Retrieve Book's Owner Data.")
+											}
+											var newLend model.Lends
+											newLend.Return_date = time.Time{}
+											newLend.Is_returned = false
+											newLend.Book_owner_id = ownerData.ID
+											newLend.Book_owner_email = ownerData.Email
+											newLend.Book_owner_name = ownerData.Name
+											newLend.Book_owner_address = ownerData.Address
+											newLend.Book_owner_phone = ownerData.Phone_number
+											newLend.Book_title = targetedBook.Title
+											newLend.Book_author = targetedBook.Author
+											newLend.IDUser = currentUser.ID
+											newLend.IDBook = targetedBook.ID
+
+											resBorrowBook, err := lendControl.AddLend(newLend)
+
+											if err != nil {
+												fmt.Println("Error on Borrow Book", err.Error())
+											} else {
+												// Update Status Is Borrowed di Buku
+												targetedBook.Is_Borrowed = true
+												resUpdateIsborrowed, err := bookControl.Edit(targetedBook)
+												if err != nil {
+													fmt.Println("Error on Update IsBorrowed Status", err.Error())
+												} else {
+													if resUpdateIsborrowed.ID != 0 {
+														Message("Success Borrow Book", "Success Add Borrowed Book : "+resBorrowBook.Book_title, "")
+													} else {
+														fmt.Println("Error on Update isBorrowedBook, no book updated", err.Error())
+													}
+												}
+											}
+											isNotYesNo = false
+											isFindAuthor = false
+
+										} else if yesNo == "N" || yesNo == "n" {
+											isNotYesNo = false
+											isFindAuthor = false
+											callClear()
+										} else {
+											isNotYesNo = true
+										}
+									}
+								}
+							case 9:
+								Message("Kembali", "Ke Menu Sebelumnya...", "")
+								isFindAuthor = false
+							case 0:
+								Message("Kembali", "Ke Menu...", "")
+								isFindAuthor = false
+								homepageMemberMenu = false
+							}
 						}
-						Message("Done", "", "")
 					case 9:
 						Message("Kembali", "Ke Menu Sebelumnya...", "")
 						isRunning = false
@@ -389,59 +597,62 @@ func main() {
 							callClear()
 							var targetedBook model.Books = resAvailBook[inputBookNumber-1]
 							ViewDetailBook(targetedBook)
+							if targetedBook.ID == currentBook.IDUser || targetedBook.Is_Borrowed {
+								Message("Borrow Failed", "You can't borrow your own book Or Book is not Available.", "")
+							} else {
+								fmt.Println("\nAre you sure want to borrow this book? (Y/N)")
 
-							fmt.Println("\nAre you sure want to borrow this book? (Y/N)")
+								var isNotYesNo bool = true
 
-							var isNotYesNo bool = true
+								for isNotYesNo {
+									fmt.Scanln(&yesNo)
+									if yesNo == "Y" || yesNo == "y" {
+										isNotYesNo = false
 
-							for isNotYesNo {
-								fmt.Scanln(&yesNo)
-								if yesNo == "Y" || yesNo == "y" {
-									isNotYesNo = false
-
-									ownerData, err := userControl.GetById(targetedBook.IDUser)
-									if err != nil {
-										fmt.Println("Failed Retrieve Book's Owner Data.")
-									}
-									var newLend model.Lends
-									newLend.Return_date = time.Time{}
-									newLend.Is_returned = false
-									newLend.Book_owner_id = ownerData.ID
-									newLend.Book_owner_email = ownerData.Email
-									newLend.Book_owner_name = ownerData.Name
-									newLend.Book_owner_address = ownerData.Address
-									newLend.Book_owner_phone = ownerData.Phone_number
-									newLend.Book_title = targetedBook.Title
-									newLend.Book_author = targetedBook.Author
-									newLend.IDUser = currentUser.ID
-									newLend.IDBook = targetedBook.ID
-
-									resBorrowBook, err := lendControl.AddLend(newLend)
-
-									if err != nil {
-										fmt.Println("Error on Borrow Book", err.Error())
-									} else {
-										// Update Status Is Borrowed di Buku
-										targetedBook.Is_Borrowed = true
-										resUpdateIsborrowed, err := bookControl.Edit(targetedBook)
+										ownerData, err := userControl.GetById(targetedBook.IDUser)
 										if err != nil {
-											fmt.Println("Error on Update IsBorrowed Status", err.Error())
-										} else {
-											if resUpdateIsborrowed.ID != 0 {
-												Message("Success Borrow Book", "Success Add Borrowed Book : "+resBorrowBook.Book_title, "")
-											} else {
-												fmt.Println("Error on Update isBorrowedBook, no book updated", err.Error())
-											}
-
+											fmt.Println("Failed Retrieve Book's Owner Data.")
 										}
-									}
-									isNotYesNo = false
+										var newLend model.Lends
+										newLend.Return_date = time.Time{}
+										newLend.Is_returned = false
+										newLend.Book_owner_id = ownerData.ID
+										newLend.Book_owner_email = ownerData.Email
+										newLend.Book_owner_name = ownerData.Name
+										newLend.Book_owner_address = ownerData.Address
+										newLend.Book_owner_phone = ownerData.Phone_number
+										newLend.Book_title = targetedBook.Title
+										newLend.Book_author = targetedBook.Author
+										newLend.IDUser = currentUser.ID
+										newLend.IDBook = targetedBook.ID
 
-								} else if yesNo == "N" || yesNo == "n" {
-									isNotYesNo = false
-									callClear()
-								} else {
-									isNotYesNo = true
+										resBorrowBook, err := lendControl.AddLend(newLend)
+
+										if err != nil {
+											fmt.Println("Error on Borrow Book", err.Error())
+										} else {
+											// Update Status Is Borrowed di Buku
+											targetedBook.Is_Borrowed = true
+											resUpdateIsborrowed, err := bookControl.Edit(targetedBook)
+											if err != nil {
+												fmt.Println("Error on Update IsBorrowed Status", err.Error())
+											} else {
+												if resUpdateIsborrowed.ID != 0 {
+													Message("Success Borrow Book", "Success Add Borrowed Book : "+resBorrowBook.Book_title, "")
+												} else {
+													fmt.Println("Error on Update isBorrowedBook, no book updated", err.Error())
+												}
+
+											}
+										}
+										isNotYesNo = false
+
+									} else if yesNo == "N" || yesNo == "n" {
+										isNotYesNo = false
+										callClear()
+									} else {
+										isNotYesNo = true
+									}
 								}
 							}
 						case 9:
@@ -879,59 +1090,62 @@ func main() {
 											callClear()
 											var targetedBook model.Books = resAvailBook[inputBookNumber-1]
 											ViewDetailBook(targetedBook)
+											if targetedBook.ID == currentBook.IDUser || targetedBook.Is_Borrowed {
+												Message("Borrow Failed", "You can't borrow your own book Or Book is not Available.", "")
+											} else {
+												fmt.Println("\nAre you sure want to borrow this book? (Y/N)")
 
-											fmt.Println("\nAre you sure want to borrow this book? (Y/N)")
+												var isNotYesNo bool = true
 
-											var isNotYesNo bool = true
+												for isNotYesNo {
+													fmt.Scanln(&yesNo)
+													if yesNo == "Y" || yesNo == "y" {
+														isNotYesNo = false
 
-											for isNotYesNo {
-												fmt.Scanln(&yesNo)
-												if yesNo == "Y" || yesNo == "y" {
-													isNotYesNo = false
-
-													ownerData, err := userControl.GetById(targetedBook.IDUser)
-													if err != nil {
-														fmt.Println("Failed Retrieve Book's Owner Data.")
-													}
-													var newLend model.Lends
-													newLend.Return_date = time.Time{}
-													newLend.Is_returned = false
-													newLend.Book_owner_id = ownerData.ID
-													newLend.Book_owner_email = ownerData.Email
-													newLend.Book_owner_name = ownerData.Name
-													newLend.Book_owner_address = ownerData.Address
-													newLend.Book_owner_phone = ownerData.Phone_number
-													newLend.Book_title = targetedBook.Title
-													newLend.Book_author = targetedBook.Author
-													newLend.IDUser = currentUser.ID
-													newLend.IDBook = targetedBook.ID
-
-													resBorrowBook, err := lendControl.AddLend(newLend)
-
-													if err != nil {
-														fmt.Println("Error on Borrow Book", err.Error())
-													} else {
-														// Update Status Is Borrowed di Buku
-														targetedBook.Is_Borrowed = true
-														resUpdateIsborrowed, err := bookControl.Edit(targetedBook)
+														ownerData, err := userControl.GetById(targetedBook.IDUser)
 														if err != nil {
-															fmt.Println("Error on Update IsBorrowed Status", err.Error())
-														} else {
-															if resUpdateIsborrowed.ID != 0 {
-																Message("Success Borrow Book", "Success Add Borrowed Book : "+resBorrowBook.Book_title, "")
-															} else {
-																fmt.Println("Error on Update isBorrowedBook, no book updated", err.Error())
-															}
-
+															fmt.Println("Failed Retrieve Book's Owner Data.")
 														}
-													}
-													isNotYesNo = false
+														var newLend model.Lends
+														newLend.Return_date = time.Time{}
+														newLend.Is_returned = false
+														newLend.Book_owner_id = ownerData.ID
+														newLend.Book_owner_email = ownerData.Email
+														newLend.Book_owner_name = ownerData.Name
+														newLend.Book_owner_address = ownerData.Address
+														newLend.Book_owner_phone = ownerData.Phone_number
+														newLend.Book_title = targetedBook.Title
+														newLend.Book_author = targetedBook.Author
+														newLend.IDUser = currentUser.ID
+														newLend.IDBook = targetedBook.ID
 
-												} else if yesNo == "N" || yesNo == "n" {
-													isNotYesNo = false
-													callClear()
-												} else {
-													isNotYesNo = true
+														resBorrowBook, err := lendControl.AddLend(newLend)
+
+														if err != nil {
+															fmt.Println("Error on Borrow Book", err.Error())
+														} else {
+															// Update Status Is Borrowed di Buku
+															targetedBook.Is_Borrowed = true
+															resUpdateIsborrowed, err := bookControl.Edit(targetedBook)
+															if err != nil {
+																fmt.Println("Error on Update IsBorrowed Status", err.Error())
+															} else {
+																if resUpdateIsborrowed.ID != 0 {
+																	Message("Success Borrow Book", "Success Add Borrowed Book : "+resBorrowBook.Book_title, "")
+																} else {
+																	fmt.Println("Error on Update isBorrowedBook, no book updated", err.Error())
+																}
+
+															}
+														}
+														isNotYesNo = false
+
+													} else if yesNo == "N" || yesNo == "n" {
+														isNotYesNo = false
+														callClear()
+													} else {
+														isNotYesNo = true
+													}
 												}
 											}
 										case 9:
@@ -1138,4 +1352,12 @@ func ViewDetailBook(_bookData model.Books) {
 	fmt.Println("Book Title : ", _bookData.Title)
 	fmt.Println("Book Author : ", _bookData.Author)
 	fmt.Println("Book Status : ", bookStatus)
+}
+
+func BorrowedStatus(Is_Borrowed bool) string {
+	if Is_Borrowed {
+		return "Not Available"
+	} else {
+		return "Available"
+	}
 }
