@@ -59,6 +59,11 @@ func main() {
 		fmt.Println("Can't connect to DB", err.Error())
 	}
 
+	// Auto Login
+	resultAutoLogin, _ := userControl.Get("doi@gmail.com", "123")
+	currentUser = resultAutoLogin[0]
+	isLoggedIn = true
+
 	for isRunning {
 		callClear()
 
@@ -478,7 +483,7 @@ func main() {
 											fmt.Println("== Choose Number Edit Book Data ==")
 											fmt.Scanln(&inputBookNumber)
 
-											if inputBookNumber < len(result) {
+											if inputBookNumber > len(result) || inputBookNumber < 1 {
 												Message("Input Not Valid", "Number input must in range.", "")
 											} else {
 												notValidInput = false
@@ -573,8 +578,13 @@ func main() {
 										}
 
 									case 9:
+										Message("Kembali", "Ke Menu Sebelumnya...", "")
+										listMyBookMenu = false
 									case 0:
-
+										Message("Kembali", "Ke Menu...", "")
+										listMyBookMenu = false
+										myLibraryMenu = false
+										homepageMemberMenu = false
 									}
 								}
 							}
@@ -635,8 +645,18 @@ func main() {
 										switch inputMenu {
 										case 1:
 											var inputBookNumber int
-											fmt.Println("== Choose Number to Borrow Book ==")
-											fmt.Scanln(&inputBookNumber)
+											// validasi input, kalau dia <= 0 panic error out of range
+											notValidInput := true
+											for notValidInput {
+												fmt.Println("== Choose Number to Borrow Book ==")
+												fmt.Scanln(&inputBookNumber)
+												fmt.Println("Len data resavaild", len(resAvailBook))
+												if inputBookNumber > len(resAvailBook) || inputBookNumber < 1 {
+													Message("Input Not Valid", "Number input must in range.", "")
+												} else {
+													notValidInput = false
+												}
+											}
 
 											callClear()
 											var targetedBook model.Books = resAvailBook[inputBookNumber-1]
@@ -697,9 +717,14 @@ func main() {
 												}
 											}
 										case 9:
+											Message("Kembali", "Ke Menu Sebelumnua...", "")
 											isListAvailableBook = false
 										case 0:
-
+											Message("Kembali", "Ke Menu...", "")
+											isListAvailableBook = false
+											Borrow = false
+											myLibraryMenu = false
+											homepageMemberMenu = false
 										}
 									}
 								case 3:
@@ -742,7 +767,7 @@ func main() {
 												fmt.Println("== Choose Number To Be Returned ==")
 												fmt.Scanln(&inputBookNumber)
 
-												if inputBookNumber < len(result) {
+												if inputBookNumber > len(result) || inputBookNumber < 1 {
 													Message("Input Not Valid", "Number input must in range.", "")
 												} else {
 													notValidInput = false
@@ -807,7 +832,7 @@ func main() {
 											Message("Kembali", "Ke Menu Sebelumnya...", "")
 											listBorrowedMenu = false
 										case 0:
-											Message("Kembali", "Ke Menu Sebelumnya...", "")
+											Message("Kembali", "Ke Menu...", "")
 											listBorrowedMenu = false
 											homepageMemberMenu = false
 										}
