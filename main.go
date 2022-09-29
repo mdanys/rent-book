@@ -555,7 +555,7 @@ func main() {
 
 						fmt.Println("List Available Book Table")
 						fmt.Println("==================================")
-						fmt.Printf("%4s | %5s | %15s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status", "Owner")
+						fmt.Printf("%4s | %7s | %25s | %25s | %13s |\n", "No", "Book Id", "Title", "Author", "Status")
 
 						if resAvailBook != nil {
 							i := 1
@@ -566,7 +566,7 @@ func main() {
 								} else {
 									status = "Available"
 								}
-								fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", i, value.ID, value.Title, value.Author, status)
+								fmt.Printf("%4d | %7d | %25s | %25s | %13s |\n", i, value.ID, value.Title, value.Author, status)
 								i++
 							}
 						} else {
@@ -880,7 +880,7 @@ func main() {
 
 									fmt.Println("List My Book Table")
 									fmt.Println("==================================")
-									fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status")
+									fmt.Printf("%4s | %7s | %25s | %25s | %13s |\n", "No", "Book Id", "Title", "Author", "Status")
 
 									if !reflect.ValueOf(result).IsZero() {
 										i := 1
@@ -891,7 +891,7 @@ func main() {
 											} else {
 												status = "Available"
 											}
-											fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", i, value.ID, value.Title, value.Author, status)
+											fmt.Printf("%4d | %7d | %25s | %25s | %13s |\n", i, value.ID, value.Title, value.Author, status)
 											i++
 										}
 									} else {
@@ -929,7 +929,7 @@ func main() {
 											callClear()
 											fmt.Println("List My Book Table")
 											fmt.Println("==================================")
-											fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status")
+											fmt.Printf("%4s | %7s | %25s | %25s | %13s |\n", "No", "Book Id", "Title", "Author", "Status")
 
 											var status string
 											if targetedBook.Is_Borrowed {
@@ -937,7 +937,7 @@ func main() {
 											} else {
 												status = "Available"
 											}
-											fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", 1, targetedBook.ID, targetedBook.Title, targetedBook.Author, status)
+											fmt.Printf("%4d | %7d | %25s | %25s | %13s |\n", 1, targetedBook.ID, targetedBook.Title, targetedBook.Author, status)
 
 											fmt.Println("\n==============================")
 											fmt.Println("1. Edit Title")
@@ -1048,7 +1048,7 @@ func main() {
 
 										fmt.Println("List Available Book Table")
 										fmt.Println("==================================")
-										fmt.Printf("%4s | %5s | %15s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Status", "Owner")
+										fmt.Printf("%4s | %7s | %25s | %25s | %13s |\n", "No", "Book Id", "Title", "Author", "Status")
 
 										if resAvailBook != nil {
 											i := 1
@@ -1059,7 +1059,7 @@ func main() {
 												} else {
 													status = "Available"
 												}
-												fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", i, value.ID, value.Title, value.Author, status)
+												fmt.Printf("%4d | %7d | %25s | %25s | %13s |\n", i, value.ID, value.Title, value.Author, status)
 												i++
 											}
 										} else {
@@ -1173,12 +1173,12 @@ func main() {
 
 										fmt.Println("List of My Borrowed Books")
 										fmt.Println("==================================")
-										fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Book Owner")
+										fmt.Printf("%4s | %7s | %25s | %25s | %10s |\n", "No", "Book Id", "Title", "Author", "Book Owner")
 
 										if result != nil {
 											i := 1
 											for _, value := range result {
-												fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", i, value.ID, value.Book_title, value.Book_author, value.Book_owner_name)
+												fmt.Printf("%4d | %7d | %25s | %25s | %10s |\n", i, value.ID, value.Book_title, value.Book_author, value.Book_owner_name)
 												i++
 											}
 										} else {
@@ -1211,9 +1211,9 @@ func main() {
 											callClear()
 											fmt.Println("List My Borrowed Books")
 											fmt.Println("==================================")
-											fmt.Printf("%4s | %5s | %15s | %15s | %15s |\n", "No", "Book Id", "Title", "Author", "Book Owner")
+											fmt.Printf("%4s | %7s | %25s | %25s | %10s |\n", "No", "Book Id", "Title", "Author", "Book Owner")
 
-											fmt.Printf("%4d | %5d | %15s | %15s | %15s |\n", 1, targetedLend.ID, targetedLend.Book_title, targetedLend.Book_author, targetedLend.Book_owner_name)
+											fmt.Printf("%4d | %7d | %25s | %25s | %10s |\n", 1, targetedLend.ID, targetedLend.Book_title, targetedLend.Book_author, targetedLend.Book_owner_name)
 
 											fmt.Println("\n==============================")
 
