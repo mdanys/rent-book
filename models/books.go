@@ -52,12 +52,12 @@ func (bm BooksModel) GetWhere(_title string) ([]Books, error) {
 	return result, nil
 }
 
-func (bm BooksModel) GetUserBook(_IDUser uint) (Books, error) {
-	var result Books
+func (bm BooksModel) GetUserBooks(_IDUser uint) ([]Books, error) {
+	var result []Books
 	err := bm.DB.Where(&Books{IDUser: _IDUser}).First(&result).Error
 	if err != nil {
 		fmt.Println("Error on Query", err.Error())
-		return Books{}, err
+		return nil, err
 	}
 	return result, nil
 }

@@ -37,11 +37,11 @@ func (bc BooksControl) GetWhere(_title string) ([]model.Books, error) {
 	return result, nil
 }
 
-func (bc BooksControl) GetUserBook(_IDUser uint) (model.Books, error) {
-	result, err := bc.Model.GetUserBook(_IDUser)
+func (bc BooksControl) GetUserBooks(_IDUser uint) ([]model.Books, error) {
+	result, err := bc.Model.GetUserBooks(_IDUser)
 	if err != nil {
 		fmt.Println("Error on GetWhere", err.Error())
-		return model.Books{}, err
+		return nil, err
 	}
 	return result, nil
 }
