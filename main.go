@@ -53,10 +53,12 @@ func main() {
 	bookModel := models.BooksModel{DB: gconn}
 	bookControl := controllers.BooksControl{Model: bookModel}
 	lendModel := models.LendsModel{DB: gconn}
-	lendControl := controllers.LendsControl{Model: lendModel}
+	lendControl := controllers.LendsControl{Model: lendModel, Util: controllers.MyUtil{}}
+	//utilCtl := controllers.MyUtil{}
 
 	if err != nil {
 		fmt.Println("Can't connect to DB", err.Error())
+		//utilCtl.ErrorMsg()
 	}
 
 	// Auto Login
