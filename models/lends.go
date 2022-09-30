@@ -26,6 +26,8 @@ type LendsModel struct {
 	DB *gorm.DB
 }
 
+//myUtil := controllers.myUtil{}
+
 // Fungsi menampilkan list buku yang user pinjam
 func (lm LendsModel) GetUserBookBorrow(_IDUser uint) ([]Lends, error) {
 	var result []Lends

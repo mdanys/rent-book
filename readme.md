@@ -18,9 +18,10 @@ For user that not login, you can search and look of the available book list. And
 - My Library
 - Borrow Book
 - Return Book
-  All borrow-lend activity is tracked in this app, so you don't need to worry and be at ease sharing your book with your friends.
-  We hope to implement more features in the future.
-  Cheers! Happy Reading!
+
+All borrow-lend activity is tracked in this app, so you don't need to worry and be at ease sharing your book with your friends.
+We hope to implement more features in the future.
+Cheers! Happy Reading!
 
 ## Environtment
 
