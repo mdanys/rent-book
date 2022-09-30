@@ -17,7 +17,7 @@ import (
 )
 
 var showError bool = true
-var isRunning bool = true
+var isRunning bool = false
 var isLoggedIn bool = false
 var currentUser models.Users
 var currentBook models.Books
@@ -46,7 +46,7 @@ func migrate(db *gorm.DB) {
 
 func main() {
 	var inputMenu int
-	gconn, err := connectGorm()
+	gconn, errDB := connectGorm()
 	migrate(gconn)
 	userModel := models.UsersModel{DB: gconn}
 	userControl := controllers.UsersControl{Model: userModel}
@@ -56,9 +56,11 @@ func main() {
 	lendControl := controllers.LendsControl{Model: lendModel, Util: controllers.MyUtil{}}
 	//utilCtl := controllers.MyUtil{}
 
-	if err != nil {
-		fmt.Println("Can't connect to DB", err.Error())
-		//utilCtl.ErrorMsg()
+	if errDB != nil {
+		ErrorMsg(showError, "Failed Connect to Database", "Please check your database connection.", errDB.Error())
+		isRunning = false
+	} else {
+		isRunning = true
 	}
 
 	// Auto Login
