@@ -64,9 +64,9 @@ func main() {
 	}
 
 	// Auto Login
-	resultAutoLogin, _ := userControl.Get("doi@gmail.com", "123")
-	currentUser = resultAutoLogin[0]
-	isLoggedIn = true
+	// resultAutoLogin, _ := userControl.Get("doi@gmail.com", "123")
+	// currentUser = resultAutoLogin[0]
+	// isLoggedIn = true
 
 	for isRunning {
 		callClear()
