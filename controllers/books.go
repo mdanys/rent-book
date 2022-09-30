@@ -18,8 +18,8 @@ func (bc BooksControl) GetAll() ([]model.Books, error) {
 	return result, nil
 }
 
-func (bc BooksControl) GetAllAvailable() ([]model.Books, error) {
-	result, err := bc.Model.GetAllAvailable()
+func (bc BooksControl) GetAllAvailable(_IDUser uint) ([]model.Books, error) {
+	result, err := bc.Model.GetAllAvailable(_IDUser)
 	if err != nil {
 		bc.Util.ErrorMsg("Error on GetAll", "", err.Error())
 		return nil, err

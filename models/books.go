@@ -31,10 +31,10 @@ func (bm BooksModel) GetAll() ([]Books, error) {
 	}
 	return result, nil
 }
-func (bm BooksModel) GetAllAvailable() ([]Books, error) {
+func (bm BooksModel) GetAllAvailable(_IDUser uint) ([]Books, error) {
 	var result []Books
 	// err := bm.DB.Where(&Books{Is_Borrowed: false}).Find(&result).Error
-	err := bm.DB.Not("is_borrowed = ?", 1).Find(&result).Error
+	err := bm.DB.Where("id_user <> ? AND is_borrowed = ?", _IDUser, 0).Find(&result).Error
 	if err != nil {
 		fmt.Println("Error on Query", err.Error())
 		return nil, err
